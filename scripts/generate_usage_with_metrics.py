@@ -15,13 +15,23 @@ def get_rate_card_models():
 
 def generate_usage_events(customers_df, models_df, days=7):
     """
-    Generate simulated usage events for each customer
+    Generate simulated usage events for each customer matching the billable metrics:
     
-    The simulation will:
-    1. Generate more usage during business hours
-    2. Have some variation between customers
-    3. Include both input and output tokens for each model
-    4. Include occasional GPU usage
+    1. Tokens metric:
+       - event_type: 'tokens'
+       - group_keys: ['type', 'model_name']
+       - properties: count_tokens, type (input/output), model_name
+    
+    2. GPU metric:
+       - event_type: 'gpu'
+       - group_keys: ['type']
+       - properties: count_seconds, type (gpu_type_X)
+    
+    The simulation includes:
+    1. More usage during business hours
+    2. Variation between customers
+    3. Both input and output tokens for each model
+    4. Occasional GPU usage
     """
     
     events = []
@@ -143,6 +153,25 @@ def send_events_to_metronome(events, api_key):
                     print(f"Response: {e.response.text}")
                 break
 
+def validate_events(events):
+    """
+    Validate that events match the billable metrics configuration:
+    1. Tokens events have all required properties
+    2. GPU events have all required properties
+    """
+    for event in events:
+        if event['event_type'] == 'tokens':
+            assert 'type' in event['properties'], "Token event missing 'type' property"
+            assert event['properties']['type'] in ['input', 'output'], "Token event 'type' must be 'input' or 'output'"
+            assert 'model_name' in event['properties'], "Token event missing 'model_name' property"
+            assert 'count_tokens' in event['properties'], "Token event missing 'count_tokens' property"
+            assert isinstance(event['properties']['count_tokens'], int), "count_tokens must be an integer"
+        elif event['event_type'] == 'gpu':
+            assert 'type' in event['properties'], "GPU event missing 'type' property"
+            assert event['properties']['type'].startswith('gpu_type_'), "GPU event 'type' must start with 'gpu_type_'"
+            assert 'count_seconds' in event['properties'], "GPU event missing 'count_seconds' property"
+            assert isinstance(event['properties']['count_seconds'], int), "count_seconds must be an integer"
+
 def main():
     # Load data
     customers_df = get_customers()
@@ -151,6 +180,10 @@ def main():
     # Generate events
     print("Generating usage events...")
     events = generate_usage_events(customers_df, models_df)
+    
+    # Validate events match billable metrics configuration
+    print("Validating events...")
+    validate_events(events)
     
     # Save events to file for reference
     with open('generated_usage_events.json', 'w') as f:

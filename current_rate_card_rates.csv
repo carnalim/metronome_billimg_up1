@@ -1,0 +1,10 @@
+product_id,product_name,rate_type,entitled,type,model_name
+,,,True,input,claude-3.5-sonnet
+,,,True,output,claude-3.5-sonnet
+,,,True,input,gemini-1.5-flash-8B
+,,,True,output,gemini-1.5-flash-8B
+,,,True,input,gpt4-o
+,,,True,output,gpt4-o
+,,,True,gpu_type_1,
+,,,True,gpu_type_2,
+,,,True,gpu_type_3,

@@ -30,7 +30,7 @@ def generate_usage_events(customers_df, models_df, days=30):
     models = models_df[models_df['model_name'].notna()]['model_name'].unique()
     
     # Get GPU types
-    gpu_types = models_df[models_df['gpu_type_1'].notna()].index
+    gpu_types = models_df[models_df['type'].str.startswith('gpu_type_', na=False)]['type'].unique()
     
     for _, customer in customers_df.iterrows():
         # Assign random usage patterns to this customer

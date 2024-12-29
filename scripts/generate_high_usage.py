@@ -3,12 +3,13 @@ import numpy as np
 from datetime import datetime, timedelta, timezone
 import requests
 import json
+import time
 
 def get_rate_card_models():
     """Load rate card data from CSV"""
     return pd.read_csv('current_rate_card_rates.csv')
 
-def generate_intensive_usage(customer_id, models_df, days=30):
+def generate_intensive_usage(customer_id, models_df, days=7):
     """
     Generate intensive usage events for a specific customer
     
@@ -117,6 +118,7 @@ def send_events_to_metronome(events, api_key):
     batch_size = 100
     max_retries = 3
     timeout = 10  # seconds
+    delay_between_batches = 0.1  # seconds
     
     for i in range(0, len(events), batch_size):
         batch = events[i:i + batch_size]
@@ -128,6 +130,7 @@ def send_events_to_metronome(events, api_key):
                 response = requests.post(url, headers=headers, json=batch, timeout=timeout)
                 response.raise_for_status()
                 print(f"Successfully sent batch {batch_num}/{total_batches}")
+                time.sleep(delay_between_batches)
                 break
             except requests.Timeout:
                 if retry < max_retries - 1:

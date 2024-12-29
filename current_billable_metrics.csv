@@ -1,0 +1,3 @@
+id,name,custom_fields,group_keys,event_type_filter,property_filters,aggregation_type,aggregation_key
+4c27b7c3-d87d-4c3a-83f7-b590c91aa8ec,Tokens,{},"[['type', 'model_name']]",{'in_values': ['tokens']},"[{'name': 'type', 'in_values': ['input', 'output'], 'exists': True}, {'name': 'count_tokens', 'exists': True}, {'name': 'model_name', 'exists': True}]",sum,count_tokens
+caf611b7-54d9-44cd-a3f2-119685eabe11,GPU,{},[['type']],{'in_values': ['gpu']},"[{'name': 'type', 'exists': True}, {'name': 'count_seconds', 'exists': True}]",sum,count_seconds

@@ -12,7 +12,7 @@ def get_rate_card_models():
     """Load rate card data from CSV"""
     return pd.read_csv('current_rate_card_rates.csv')
 
-def generate_usage_events(customers_df, models_df, days=30):
+def generate_usage_events(customers_df, models_df, days=7):
     """
     Generate simulated usage events for each customer
     
@@ -114,16 +114,30 @@ def send_events_to_metronome(events, api_key):
     
     # Send in batches of 100 events
     batch_size = 100
+    max_retries = 3
+    timeout = 10  # seconds
+    
     for i in range(0, len(events), batch_size):
         batch = events[i:i + batch_size]
-        try:
-            response = requests.post(url, headers=headers, json=batch)
-            response.raise_for_status()
-            print(f"Successfully sent batch {i//batch_size + 1}/{len(events)//batch_size + 1}")
-        except Exception as e:
-            print(f"Error sending batch {i//batch_size + 1}: {str(e)}")
-            if hasattr(e, 'response'):
-                print(f"Response: {e.response.text}")
+        batch_num = i//batch_size + 1
+        total_batches = len(events)//batch_size + 1
+        
+        for retry in range(max_retries):
+            try:
+                response = requests.post(url, headers=headers, json=batch, timeout=timeout)
+                response.raise_for_status()
+                print(f"Successfully sent batch {batch_num}/{total_batches}")
+                break
+            except requests.Timeout:
+                if retry < max_retries - 1:
+                    print(f"Timeout sending batch {batch_num}, retrying...")
+                    continue
+                print(f"Failed to send batch {batch_num} after {max_retries} retries")
+            except Exception as e:
+                print(f"Error sending batch {batch_num}: {str(e)}")
+                if hasattr(e, 'response'):
+                    print(f"Response: {e.response.text}")
+                break
 
 def main():
     # Load data

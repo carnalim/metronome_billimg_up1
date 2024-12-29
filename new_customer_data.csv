@@ -1,0 +1,11 @@
+customer_id,name,external_id,salesforce_account_id,ingest_aliases,custom_fields,stripe_customer_id,contract_id
+913d603a-8980-43e7-8267-1f0058139848,Williams and Sons Solutions,2085f155-46a1-43aa-b5a1-8d45429aaa78,,2085f155-46a1-43aa-b5a1-8d45429aaa78,{},cus_RU9aNWHtynQKcI,
+cfb1bf9a-65ba-45c9-b5f2-41c3de0ad4f7,Bailey Perez and Young Solutions,103f1c2f-f72e-43c3-bb54-636e80b5b935,,103f1c2f-f72e-43c3-bb54-636e80b5b935,{},cus_RU9aOzDQHvrngw,
+5dd3a6be-ef84-44d5-930f-d119d839400a,Livingston-Patel Inc.,197d6c6a-7663-4005-a708-c38c22659e32,,197d6c6a-7663-4005-a708-c38c22659e32,{},cus_RU9arr3zcNhDxF,
+6092baed-2ba3-499b-9c36-d32f0676904f,Horton-Greer Corp.,01007ad0-1ef4-4689-acf5-84b433d60ebd,,01007ad0-1ef4-4689-acf5-84b433d60ebd,{},cus_RU9aiShMYoIbWh,
+ddf8dec8-8421-48c8-b631-a74672748d2f,Johnson Miller and Bullock LLC,e9a5383f-adf3-45a5-be3f-ace9ee3168dc,,e9a5383f-adf3-45a5-be3f-ace9ee3168dc,{},cus_RU9a0JWYeA94md,
+24a66073-6fdf-4310-9a92-df0618ecb9c1,Nelson-Burnett LLC,18f2daee-36a7-4eb7-b7d3-11cc330bf248,,18f2daee-36a7-4eb7-b7d3-11cc330bf248,{},cus_RU9aO7BcdMeDzZ,
+506d8fb1-5c8f-4cc4-be62-a59e1b0d72d3,Rivera-Jensen Corp.,e42eb052-ba50-4825-9fc1-d27f62ca27de,,e42eb052-ba50-4825-9fc1-d27f62ca27de,{},cus_RU9aHz8oTE8pL5,
+490c1a87-d359-4323-80b3-93fd372a0ca6,Castillo Wheeler and Leon LLC,84c97ad3-a285-4ae6-9260-245f6ba4a06e,,84c97ad3-a285-4ae6-9260-245f6ba4a06e,{},cus_RU9av2sIhhBH2x,
+b292f8f1-e918-42da-8db5-5083e3dbcd68,White Inc.,d8e33db6-9149-4c1f-bb81-0708605a1a8c,,d8e33db6-9149-4c1f-bb81-0708605a1a8c,{},cus_RU9ams09HWkFJD,
+584764e6-3fb6-4ddc-bc52-287f25a1df4c,Johnson Williams and Joseph LLC,88e5f1f7-91f1-4920-b9b6-ef68d4126966,,88e5f1f7-91f1-4920-b9b6-ef68d4126966,{},cus_RU9aku46gOg64v,

@@ -9,13 +9,40 @@ def get_rate_card_models():
     """Load rate card data from CSV"""
     return pd.read_csv('current_rate_card_rates.csv')
 
+def get_token_price(model_name, token_type):
+    """Get price per token based on model and type"""
+    # Define base prices in dollars per 1000 tokens
+    prices = {
+        'gpt4-o': {'input': 0.03, 'output': 0.06},
+        'claude-3.5-sonnet': {'input': 0.02, 'output': 0.04},
+        'gemini-1.5-flash-8B': {'input': 0.01, 'output': 0.03}
+    }
+    
+    # Find matching model (partial match)
+    for model in prices:
+        if model in model_name.lower():
+            return prices[model][token_type]
+    
+    # Default price if no match
+    return prices['claude-3.5-sonnet'][token_type]
+
+def get_gpu_price(gpu_type):
+    """Get price per hour for GPU usage"""
+    # Define GPU prices in dollars per hour
+    prices = {
+        'gpu_type_1': 0.80,  # Basic GPU
+        'gpu_type_2': 1.60,  # Advanced GPU
+        'gpu_type_3': 2.40   # Premium GPU
+    }
+    return prices.get(gpu_type, 0.80)
+
 def generate_intensive_usage(customer_id, models_df, days=7):
     """
     Generate intensive usage events for a specific customer
     
     The simulation will generate:
-    1. Very high token usage across all models
-    2. Heavy GPU utilization
+    1. Very high token usage across all models with associated costs
+    2. Heavy GPU utilization with hourly rates
     3. Consistent usage patterns with peak hours
     4. Large batch processing simulations
     """
@@ -58,6 +85,12 @@ def generate_intensive_usage(customer_id, models_df, days=7):
                 
                 timestamp = current_date + timedelta(minutes=np.random.randint(60))
                 
+                # Calculate costs
+                input_price = get_token_price(model, 'input')
+                output_price = get_token_price(model, 'output')
+                input_cost = (input_tokens / 1000) * input_price
+                output_cost = (output_tokens / 1000) * output_price
+                
                 # Input event
                 events.append({
                     'transaction_id': f"{timestamp.isoformat()}_{customer_id}_{model}_input",
@@ -67,7 +100,9 @@ def generate_intensive_usage(customer_id, models_df, days=7):
                     'properties': {
                         'type': 'input',
                         'model_name': model,
-                        'token_count': input_tokens
+                        'token_count': input_tokens,
+                        'price_per_1k_tokens': input_price,
+                        'cost_usd': input_cost
                     }
                 })
                 
@@ -80,7 +115,9 @@ def generate_intensive_usage(customer_id, models_df, days=7):
                     'properties': {
                         'type': 'output',
                         'model_name': model,
-                        'token_count': output_tokens
+                        'token_count': output_tokens,
+                        'price_per_1k_tokens': output_price,
+                        'cost_usd': output_cost
                     }
                 })
         
@@ -91,6 +128,10 @@ def generate_intensive_usage(customer_id, models_df, days=7):
             gpu_hours = np.random.uniform(0.5, 4.0)  # Between 30 minutes and 4 hours
             
             timestamp = current_date + timedelta(minutes=np.random.randint(60))
+            # Calculate GPU cost
+            gpu_price = get_gpu_price(gpu_type)
+            gpu_cost = gpu_hours * gpu_price
+            
             events.append({
                 'transaction_id': f"{timestamp.isoformat()}_{customer_id}_{gpu_type}",
                 'customer_id': customer_id,
@@ -98,7 +139,9 @@ def generate_intensive_usage(customer_id, models_df, days=7):
                 'timestamp': timestamp.isoformat(),
                 'properties': {
                     'type': gpu_type,
-                    'hours': gpu_hours
+                    'hours': gpu_hours,
+                    'price_per_hour': gpu_price,
+                    'cost_usd': gpu_cost
                 }
             })
         

@@ -90,14 +90,16 @@ def link_customer_to_stripe(api, console, customer_id, stripe_customer_id):
 
 
 def create_contract(api, customer_id, rate_card_id):
+    # Format the date as YYYY-MM-DDT00:00:00.000Z
+    current_date = datetime.now(timezone.utc)
+    formatted_date = current_date.strftime("%Y-%m-%dT00:00:00.000Z")
+    
     payload = {
-        "data": {
-            "rate_card_id": rate_card_id,
-            "start_date": datetime.now(timezone.utc).isoformat(),
-            "auto_renew": True
-        }
+        "customer_id": customer_id,
+        "rate_card_id": rate_card_id,
+        "starting_at": formatted_date
     }
-    url = f"{api.BASE_URL}/customers/{customer_id}/contracts"
+    url = f"{api.BASE_URL}/contracts/create"
     response = api.session.post(url, json=payload)
     if response.status_code not in [200, 201]:
         raise Exception(f"Failed to create contract. Status code: {response.status_code}. Response: {response.text}")

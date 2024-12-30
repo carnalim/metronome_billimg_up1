@@ -83,18 +83,10 @@ def link_customer_to_stripe(api, console, customer_id, stripe_customer_id):
         }]
     }
     console.print(f"Linking customer to Stripe...", style="cyan")
-    response = api._make_request(
-        "POST",
-        "/setCustomerBillingProviderConfigurations",
-        json=payload
-    )
-    console.print(f"Linking response status: {response.status_code}", style="cyan")
-    console.print(f"Linking response text: {response.text}", style="cyan")
-    console.print(f"Linking response status: {response.status_code}", style="cyan")
-    console.print(f"Linking response text: {response.text}", style="cyan")
-    console.print(f"Linking response: {response}", style="cyan")
-    console.print(f"Linking response: {response}", style="cyan")
-    return response
+    url = f"{api.BASE_URL}/setCustomerBillingProviderConfigurations"
+    response = api.session.post(url, json=payload)
+    if response.status_code != 200:
+        raise Exception(f"Failed to link customer. Status code: {response.status_code}")
 
 
 def create_contract(api, customer_id, rate_card_id):
@@ -140,8 +132,12 @@ def main():
                 console.print(f"Temporary file created: {temp_file.name}", style="cyan")
         
         console.print("[cyan]Linking customers...")
-        link_customer_to_stripe(api, console, metronome_customer['data']['id'], stripe_customer.id)
-        console.print(f"✓ Linked customer: {metronome_customer['data']['name']} (Metronome ID: {metronome_customer['data']['id']}, Stripe ID: {stripe_customer.id})", style="green")
+        try:
+            link_customer_to_stripe(api, console, metronome_customer['data']['id'], stripe_customer.id)
+            console.print(f"✓ Linked customer: {metronome_customer['data']['name']} (Metronome ID: {metronome_customer['data']['id']}, Stripe ID: {stripe_customer.id})", style="green")
+        except Exception as e:
+            console.print(f"Error linking customer: {str(e)}", style="bold red")
+            sys.exit(1)
         
         console.print("[cyan]Creating contract...")
         create_contract(api, metronome_customer['data']['id'], rate_card_id)

@@ -91,16 +91,17 @@ def link_customer_to_stripe(api, console, customer_id, stripe_customer_id):
 
 def create_contract(api, customer_id, rate_card_id):
     payload = {
-        "rate_card_id": rate_card_id,
-        "start_date": datetime.now(timezone.utc).isoformat(),
-        "auto_renew": True
+        "data": {
+            "rate_card_id": rate_card_id,
+            "start_date": datetime.now(timezone.utc).isoformat(),
+            "auto_renew": True
+        }
     }
-    response = api._make_request(
-        "POST",
-        f"/customers/{customer_id}/contracts",
-        json=payload
-    )
-    return response
+    url = f"{api.BASE_URL}/customers/{customer_id}/contracts"
+    response = api.session.post(url, json=payload)
+    if response.status_code not in [200, 201]:
+        raise Exception(f"Failed to create contract. Status code: {response.status_code}. Response: {response.text}")
+    return response.json()
 
 
 import json
@@ -110,12 +111,23 @@ def get_metronome_customer(api, customer_id):
     response = api._make_request("GET", f"/customers/{customer_id}")
     return response
 
+def get_rate_cards(api):
+    url = f"{api.BASE_URL}/rate-cards"
+    response = api.session.get(url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to get rate cards. Status code: {response.status_code}. Response: {response.text}")
+    return response.json()
+
 
 def main():
     console = Console()
-    rate_card_id = "ee186f96-3e72-4f7c-a326-a88a28e4b7da"
     try:
         api = MetronomeAPI(api_key=metronome_api_key)
+        
+        # Use default rate card
+        rate_card_id = "ee186f96-3e72-4f7c-a326-a88a28e4b7da"
+        console.print(f"✓ Using default rate card: {rate_card_id}", style="green")
+        
         console.print("[cyan]Creating customer in Metronome...")
         metronome_customer = create_metronome_customer(api)
         console.print(f"✓ Created Metronome customer: {metronome_customer['data']['name']}", style="green")

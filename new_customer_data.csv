@@ -1,4 +1,5 @@
 customer_id,name,external_id,salesforce_account_id,ingest_aliases,custom_fields,stripe_customer_id,contract_id
+821ed6cd-bd57-4adb-b69b-5f073b6a7983,Sample Company Inc. - a7142221-6d2c-40e7-9b08-691a99733b7d,4227cf4c-d324-4c0b-8f01-d0139d1c457f,,4227cf4c-d324-4c0b-8f01-d0139d1c457f,{},cus_RUbO867fsd7DdP,
 913d603a-8980-43e7-8267-1f0058139848,Williams and Sons Solutions,2085f155-46a1-43aa-b5a1-8d45429aaa78,,2085f155-46a1-43aa-b5a1-8d45429aaa78,{},cus_RU9aNWHtynQKcI,
 cfb1bf9a-65ba-45c9-b5f2-41c3de0ad4f7,Bailey Perez and Young Solutions,103f1c2f-f72e-43c3-bb54-636e80b5b935,,103f1c2f-f72e-43c3-bb54-636e80b5b935,{},cus_RU9aOzDQHvrngw,
 5dd3a6be-ef84-44d5-930f-d119d839400a,Livingston-Patel Inc.,197d6c6a-7663-4005-a708-c38c22659e32,,197d6c6a-7663-4005-a708-c38c22659e32,{},cus_RU9arr3zcNhDxF,

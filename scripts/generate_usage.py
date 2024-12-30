@@ -6,11 +6,12 @@ import json
 
 def get_customers():
     """Load customer data from CSV"""
-    return pd.read_csv('new_customer_data.csv')
+    # Only get the first 10 customers to make it manageable
+    return pd.read_csv('../recent_customers.csv').head(10)
 
 def get_rate_card_models():
     """Load rate card data from CSV"""
-    return pd.read_csv('current_rate_card_rates.csv')
+    return pd.read_csv('../current_rate_card_rates.csv')
 
 def generate_usage_events(customers_df, models_df, days=7):
     """
@@ -34,7 +35,7 @@ def generate_usage_events(customers_df, models_df, days=7):
     
     for _, customer in customers_df.iterrows():
         # Assign random usage patterns to this customer
-        daily_events = np.random.randint(50, 200)  # Events per day
+        daily_events = np.random.randint(10, 30)  # Events per day - reduced for testing
         model_preferences = {model: np.random.uniform(0.1, 1.0) for model in models}
         gpu_usage_probability = np.random.uniform(0.05, 0.2)  # 5-20% chance of GPU usage
         

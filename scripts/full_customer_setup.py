@@ -10,7 +10,7 @@ from rich.progress import Progress
 sys.path.append(str(Path(__file__).parent.parent))
 from metronome_billing.core.metronome_api import MetronomeAPI
 
-metronome_api_key = "76d6d17428784bf44e1971074ca1ac9a4079bb4d81a508cd47e0a650567f471d"
+metronome_api_key = "48b0453c99607fb5dfb4dc717ab2d9a2b6cc0dabec7885228871bc8c42748ccf"
 stripe.api_key = "sk_test_51QaIZkIXaJVb8AWbz26erRPAJeaBQ90Nef7RFZzz3zDEtLxO0rROaLkvXsb7eyL9v4X2eL6L8l2HWMX459Q2KNbk003E64rxiX"
 
 class IndustryProvider:
@@ -72,14 +72,20 @@ def create_stripe_customer(customer_data, metronome_id):
 
 def link_customer_to_stripe(api, console, customer_id, stripe_customer_id):
     payload = {
-        "provider_type": "stripe", 
-"provider_customer_id": stripe_customer_id
-        "provider_customer_id": stripe_customer_id
+        "data": [{
+            "customer_id": customer_id,
+            "billing_provider": "stripe",
+            "configuration": {
+                "stripe_customer_id": stripe_customer_id,
+                "stripe_collection_method": "charge_automatically"
+            },
+            "delivery_method": "direct_to_billing_provider"
+        }]
     }
-    console.print(f"Linking customer to Stripe with URL: /customers/{customer_id}/billing_provider", style="cyan")
+    console.print(f"Linking customer to Stripe...", style="cyan")
     response = api._make_request(
-        "PUT",
-        f"/customers/{customer_id}/billing_provider",
+        "POST",
+        "/setCustomerBillingProviderConfigurations",
         json=payload
     )
     console.print(f"Linking response status: {response.status_code}", style="cyan")
@@ -135,11 +141,11 @@ def main():
         
         console.print("[cyan]Linking customers...")
         link_customer_to_stripe(api, console, metronome_customer['data']['id'], stripe_customer.id)
-        console.print(f"✓ Linked customer: {metronome_customer['name']} (Metronome ID: {metronome_customer['customer_id']}, Stripe ID: {stripe_customer.id})", style="green")
+        console.print(f"✓ Linked customer: {metronome_customer['data']['name']} (Metronome ID: {metronome_customer['data']['id']}, Stripe ID: {stripe_customer.id})", style="green")
         
         console.print("[cyan]Creating contract...")
-        create_contract(api, metronome_customer['customer_id'], rate_card_id)
-        console.print(f"✓ Created contract for customer: {metronome_customer['name']} (Customer ID: {metronome_customer['customer_id']})", style="green")
+        create_contract(api, metronome_customer['data']['id'], rate_card_id)
+        console.print(f"✓ Created contract for customer: {metronome_customer['data']['name']} (Customer ID: {metronome_customer['data']['id']})", style="green")
         
     except Exception as e:
         console.print(f"Error: {str(e)}", style="bold red")

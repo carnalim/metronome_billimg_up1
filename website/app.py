@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import numpy as np
-from models import db, LogEntry, Customer
+from website.models import db, LogEntry, Customer
 
 sys.path.append(str(Path(__file__).parent.parent))
 from metronome_billing.core.metronome_api import MetronomeAPI
@@ -111,7 +111,7 @@ def create_contract(api, customer_id, rate_card_id):
         "rate_card_id": rate_card_id,
         "starting_at": formatted_date
     }
-    url = f"{api.BASE_URL}/contracts/create"
+    url = f"{api.BASE_URL}/contracts"
     response = api.session.post(url, json=payload)
     if response.status_code not in [200, 201]:
         raise Exception(f"Failed to create contract. Status code: {response.status_code}. Response: {response.text}")
@@ -243,17 +243,45 @@ def create_customer():
                 if rate_card_id:
                     current_date = datetime.now(timezone.utc)
                     formatted_date = current_date.strftime("%Y-%m-%dT00:00:00.000Z")
-                    contract_payload = {
-                        "customer_id": metronome_customer.get('id'),
-                        "rate_card_id": rate_card_id,
-                        "starting_at": formatted_date
-                    }
-                    contract_url = "https://api.metronome.com/v1/contracts/create"
+                    # Get rate card details to get product_id
+                    rate_card_url = "https://api.metronome.com/v1/rate-cards/list"
+                    rate_card_response = requests.post(
+                        rate_card_url,
+                        headers={"Authorization": f"Bearer {metronome_api_key}"},
+                        json={}
+                    )
+                    if rate_card_response.status_code == 200:
+                        rate_cards_data = rate_card_response.json()
+                        rate_card = next(
+                            (card for card in rate_cards_data.get('data', []) if card.get('id') == rate_card_id),
+                            None
+                        )
+                        if rate_card and rate_card.get('product_id'):
+                            contract_payload = {
+                                "customer_id": metronome_customer.get('id'),
+                                "rate_card_id": rate_card_id,
+                                "product_id": rate_card['product_id'],
+                                "starting_at": formatted_date,
+                                "status": "active"
+                            }
+                            logging.info(f"Creating contract with payload: {json.dumps(contract_payload, indent=2)}")
+                        else:
+                            error_msg = "Rate card does not have a product ID"
+                            logging.error(error_msg)
+                            flash(error_msg, "danger")
+                            return render_template('create.html', rate_cards=rate_cards, response_data=response_data)
+                    else:
+                        error_msg = f"Failed to fetch rate card: {rate_card_response.text}"
+                        logging.error(error_msg)
+                        flash(error_msg, "danger")
+                        return render_template('create.html', rate_cards=rate_cards, response_data=response_data)
+                    contract_url = "https://api.metronome.com/v1/contracts"
                     contract_response = requests.post(
                         contract_url,
                         headers={"Authorization": f"Bearer {metronome_api_key}"},
                         json=contract_payload
                     )
+                    logging.info(f"Contract response: {json.dumps(contract_response.json() if contract_response.status_code in [200, 201] else {}, indent=2)}")
                     if contract_response.status_code not in [200, 201]:
                         error_msg = f"Failed to create contract: {contract_response.text}"
                         logging.error(error_msg)
@@ -312,6 +340,81 @@ def create_customer():
         flash(error_msg, "danger")
         response_data['error'] = str(e)
         return render_template('create.html', rate_cards=[], response_data=response_data)
+
+@app.route('/products')
+def products():
+    try:
+        # Make API request to get products
+        api = MetronomeAPI(api_key=metronome_api_key)
+        logging.info("Fetching products")
+        response_data = api._make_request("POST", "/contract-pricing/products/list", json={
+            "archive_filter": "NOT_ARCHIVED"
+        })
+        logging.info(f"Products list response: {json.dumps(response_data, indent=2)}")
+
+        # Get list of products
+        if isinstance(response_data, dict) and 'data' in response_data:
+            products_list = response_data['data']
+        else:
+            products_list = []
+
+        # Get detailed information for each product
+        products = []
+        for product in products_list:
+            product_id = product.get('id')
+            if product_id:
+                logging.info(f"Getting details for product {product_id}")
+                product_response = api._make_request("POST", "/contract-pricing/products/get", json={
+                    "id": product_id
+                })
+                logging.info(f"Product response: {json.dumps(product_response, indent=2)}")
+                
+                if isinstance(product_response, dict):
+                    product_data = product_response.get('data', {})
+                    logging.info(f"Product data: {json.dumps(product_data, indent=2)}")
+                    # Get name from initial.name field
+                    initial = product_data.get('initial', {})
+                    product_data['name'] = initial.get('name', 'Unnamed Product')
+                    product_data['description'] = initial.get('description', '')
+                    logging.info(f"Product name from initial: {product_data['name']}")
+                    
+                    # Set archived status
+                    product_data['archived'] = product_data.get('archived_at') is not None
+                    
+                    # Format created_at timestamp if present
+                    created_at = product_data.get('created_at')
+                    if created_at:
+                        try:
+                            dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                            product_data['created_at'] = dt.strftime('%Y-%m-%d %H:%M:%S')
+                            logging.info(f"Formatted created_at: {product_data['created_at']}")
+                        except (ValueError, AttributeError) as e:
+                            logging.error(f"Error formatting timestamp {created_at}: {e}")
+                    
+                    # Get credit types
+                    credit_types = product_data.get('credit_types', [])
+                    logging.info(f"Credit types: {json.dumps(credit_types, indent=2)}")
+                    
+                    for credit_type in credit_types:
+                        credit_type['name'] = (
+                            credit_type.get('display_name') or 
+                            credit_type.get('name') or 
+                            'Unnamed Credit Type'
+                        )
+                    
+                    products.append(product_data)
+                    logging.info(f"Added product to list: {json.dumps(product_data, indent=2)}")
+                    logging.info(f"Got details for product {product_id}")
+        
+        logging.info(f"Found {len(products)} products with details")
+        return render_template('products.html', products=products)
+            
+    except Exception as e:
+        error_msg = f"Error loading products: {str(e)}"
+        logging.error(error_msg)
+        logging.exception("Full traceback:")
+        flash(error_msg, 'danger')
+        return render_template('products.html', products=[])
 
 @app.route('/rate-cards')
 def rate_cards():
@@ -550,80 +653,125 @@ def add_credits(customer_id):
             else:
                 flash(f"Failed to add credits: {response.text}", "danger")
         
-        # Get customer's active contract to get the product ID
-        contracts_url = f"https://api.metronome.com/v1/customers/{customer_id}/contracts"
-        contracts_response = requests.get(
-            contracts_url,
-            headers={"Authorization": f"Bearer {metronome_api_key}"}
-        )
+        # Initialize API
+        api = MetronomeAPI(api_key=metronome_api_key)
+        logging.info("Initialized MetronomeAPI")
+
+        # Get customer's active contract
+        contracts_response = api._make_request("POST", "/contracts/list", json={
+            "customer_id": customer_id,
+            "status": "active"
+        })
+        logging.info(f"Contracts response: {json.dumps(contracts_response, indent=2)}")
+        logging.info(f"Contracts response: {json.dumps(contracts_response, indent=2)}")
         
         active_contract = None
-        if contracts_response.status_code == 200:
-            contracts = contracts_response.json()
-            if not isinstance(contracts, list):
-                contracts = [contracts]
+        if isinstance(contracts_response, dict) and 'data' in contracts_response:
+            contracts_data = contracts_response
+            logging.info(f"Contracts response: {json.dumps(contracts_data, indent=2)}")
+            
+            # Handle both list and object responses
+            # Handle contracts response
+            contracts = []
+            if isinstance(contracts_data, dict):
+                if 'data' in contracts_data:
+                    if isinstance(contracts_data['data'], list):
+                        contracts = contracts_data['data']
+                    else:
+                        contracts = [contracts_data['data']]
+                else:
+                    contracts = [contracts_data]
+            elif isinstance(contracts_data, list):
+                contracts = contracts_data
+            
+            # Find active contract
             active_contract = next(
                 (c for c in contracts if isinstance(c, dict) and c.get('status') == 'active'),
                 None
             )
-            logging.info(f"Active contract: {active_contract}")
+            logging.info(f"Active contract found: {json.dumps(active_contract, indent=2) if active_contract else 'None'}")
         
-        # Get products for the form
-        if active_contract and active_contract.get('product_id'):
-            # If customer has an active contract, get that product
-            product_id = active_contract.get('product_id')
-            product_url = f"https://api.metronome.com/v1/products/{product_id}"
-            product_response = requests.get(
-                product_url,
-                headers={"Authorization": f"Bearer {metronome_api_key}"}
-            )
-            if product_response.status_code == 200:
-                products = [product_response.json()]
-            else:
-                products = []
-                logging.error(f"Failed to fetch product: {product_response.text}")
-        else:
-            # Otherwise get all products
-            products_response = requests.get(
-                "https://api.metronome.com/v1/products",
-                headers={"Authorization": f"Bearer {metronome_api_key}"}
-            )
-            if products_response.status_code == 200:
-                products = products_response.json()
-                if not isinstance(products, list):
-                    products = [products]
-            else:
-                products = []
-                logging.error(f"Failed to fetch products: {products_response.text}")
-        
-        # Get credit types from the active contract's rate card
+        # Get products and credit types
+        products = []
         credit_types = []
-        if active_contract and active_contract.get('rate_card_id'):
+        
+        if active_contract:
+            # Get rate card details
             rate_card_id = active_contract.get('rate_card_id')
-            rate_card_url = "https://api.metronome.com/v1/rate-cards"
-            rate_card_response = requests.get(
-                rate_card_url,
-                headers={
-                    "Authorization": f"Bearer {metronome_api_key}",
-                    "Accept": "application/json"
-                }
-            )
-            if rate_card_response.status_code == 200:
-                rate_cards = rate_card_response.json()
-                # Find the specific rate card
-                rate_card = next(
-                    (card for card in rate_cards.get('data', []) if card.get('id') == rate_card_id),
-                    None
-                )
-                if rate_card:
-                    # Extract credit types from rate card pricing
-                    pricing = rate_card.get('pricing', {})
-                    for item in pricing.get('items', []):
-                        if item.get('credit_type_id'):
-                            credit_types.append({
-                                'id': item['credit_type_id'],
-                                'name': item.get('name', 'Unknown Credit Type')
-                            })
+            if rate_card_id:
+                rate_card_response = api._make_request("POST", "/contract-pricing/rate-cards/list", json={})
+                logging.info(f"Rate card response: {json.dumps(rate_card_response, indent=2)}")
+                
+                if isinstance(rate_card_response, dict) and 'data' in rate_card_response:
+                    rate_cards_data = rate_card_response
+                    rate_card = next(
+                        (card for card in rate_cards_data.get('data', []) if card.get('id') == rate_card_id),
+                        None
+                    )
+                    
+                    if rate_card and rate_card.get('product_id'):
+                        # Get product details
+                        product_id = rate_card['product_id']
+                        product_response = api._make_request("POST", "/contract-pricing/products/get", json={
+                            "id": product_id
+                        })
+                        logging.info(f"Product response: {json.dumps(product_response, indent=2)}")
+                        
+                        if isinstance(product_response, dict) and 'data' in product_response:
+                            product = product_response['data']
+                            products = [product]
+                            
+                            # Get credit types from product
+                            if product.get('credit_types'):
+                                for credit_type in product['credit_types']:
+                                    credit_types.append({
+                                        'id': credit_type.get('id'),
+                                        'name': credit_type.get('name', 'Unknown Credit Type')
+                                    })
+                        else:
+                            logging.error(f"Failed to fetch product: {product_response.text}")
+        else:
+            # Get all products
+            products_response = api._make_request("POST", "/contract-pricing/products/list", json={
+                "archive_filter": "NOT_ARCHIVED"
+            })
+            logging.info(f"Products response: {json.dumps(products_response, indent=2)}")
+            
+            if isinstance(products_response, dict) and 'data' in products_response:
+                products = []
+                for product in products_response['data']:
+                    product_details = api._make_request("POST", "/contract-pricing/products/get", json={
+                        "id": product['id']
+                    })
+                    logging.info(f"Product details response for {product['id']}: {json.dumps(product_details, indent=2)}")
+                    
+                    if isinstance(product_details, dict) and 'data' in product_details:
+                        product_data = product_details['data']
+                        initial = product_data.get('initial', {})
+                        product_data['id'] = product['id']  # Ensure ID is set
+                        product_data['name'] = initial.get('name', 'Unnamed Product')
+                        
+                        # Get credit types from product
+                        if product_data.get('credit_types'):
+                            for credit_type in product_data['credit_types']:
+                                credit_types.append({
+                                    'id': credit_type.get('id'),
+                                    'name': credit_type.get('name', 'Unknown Credit Type')
+                                })
+                        
+                        products.append(product_data)
+                        logging.info(f"Added product: {product_data.get('name')} ({product_data.get('id')})")
+            else:
+                products = []
+                logging.error("Failed to fetch products")
+        
+        # Log what we found
+        logging.info(f"Found {len(products)} products")
+        for product in products:
+            logging.info(f"Product: {product.get('name')} ({product.get('id')})")
+        logging.info(f"Found {len(credit_types)} credit types")
+        for credit_type in credit_types:
+            logging.info(f"Credit Type: {credit_type.get('name')} ({credit_type.get('id')})")
         
         if not credit_types:
             flash("No credit types found in the rate card. Please ensure the customer has an active contract with a rate card.", "warning")

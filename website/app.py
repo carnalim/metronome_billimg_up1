@@ -441,8 +441,28 @@ def customers():
                     )
                 )
             
-            # Order by name
-            query = query.order_by(Customer.name)
+            # Get sort parameters
+            sort_by = request.args.get('sort_by', 'created_at')
+            sort_order = request.args.get('sort_order', 'desc')
+            
+            # Map sort field to model attribute
+            sort_field_map = {
+                'metronome_id': Customer.metronome_id,
+                'name': Customer.name,
+                'status': Customer.status,
+                'rate_card_id': Customer.rate_card_id,
+                'salesforce_id': Customer.salesforce_id,
+                'created_at': Customer.created_at
+            }
+            
+            # Get sort field from map, default to created_at if invalid
+            sort_field = sort_field_map.get(sort_by, Customer.created_at)
+            
+            # Apply sort order
+            if sort_order == 'desc':
+                query = query.order_by(sort_field.desc())
+            else:
+                query = query.order_by(sort_field.asc())
             
             # Paginate results
             pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -451,7 +471,9 @@ def customers():
             return render_template('customers.html', 
                                 customers=customers, 
                                 pagination=pagination,
-                                search_query=search_query)
+                                search_query=search_query,
+                                sort_by=sort_by,
+                                sort_order=sort_order)
         else:
             error_msg = f"Failed to fetch customers: {response.text}"
             logging.error(error_msg)
@@ -753,8 +775,31 @@ def view_logs():
     try:
         page = request.args.get('page', 1, type=int)
         per_page = 50
-        logs = LogEntry.query.order_by(LogEntry.timestamp.desc()).paginate(page=page, per_page=per_page)
-        return render_template('logs.html', logs=logs)
+        search_query = request.args.get('search', '').strip()
+        level = request.args.get('level', '').strip().upper()
+
+        # Start with base query
+        query = LogEntry.query
+
+        # Apply search filter if provided
+        if search_query:
+            search = f"%{search_query}%"
+            query = query.filter(LogEntry.message.ilike(search))
+
+        # Apply level filter if provided
+        if level in ['INFO', 'WARNING', 'ERROR']:
+            query = query.filter(LogEntry.level == level)
+
+        # Order by timestamp descending
+        query = query.order_by(LogEntry.timestamp.desc())
+
+        # Paginate results
+        logs = query.paginate(page=page, per_page=per_page)
+
+        return render_template('logs.html', 
+                            logs=logs,
+                            search_query=search_query,
+                            level=level)
     except Exception as e:
         error_msg = f"Error viewing logs: {str(e)}"
         logging.error(error_msg)

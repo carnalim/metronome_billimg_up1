@@ -7,6 +7,23 @@
         <a href="/logs" class="btn btn-primary btn-sm">Refresh</a>
     </div>
     <div class="card-body">
+        <!-- Search Form -->
+        <form method="get" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search logs..." value="{{ search_query or '' }}">
+                <select name="level" class="form-select" style="max-width: 150px;">
+                    <option value="">All Levels</option>
+                    <option value="INFO" {% if level == 'INFO' %}selected{% endif %}>INFO</option>
+                    <option value="WARNING" {% if level == 'WARNING' %}selected{% endif %}>WARNING</option>
+                    <option value="ERROR" {% if level == 'ERROR' %}selected{% endif %}>ERROR</option>
+                </select>
+                <button type="submit" class="btn btn-outline-secondary">Search</button>
+                {% if search_query or level %}
+                    <a href="{{ url_for('view_logs') }}" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+
         {% if error %}
             <div class="alert alert-danger">{{ error }}</div>
         {% else %}
@@ -43,7 +60,7 @@
                     <ul class="pagination justify-content-center">
                         {% if logs.has_prev %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('view_logs', page=logs.prev_num) }}">Previous</a>
+                            <a class="page-link" href="{{ url_for('view_logs', page=logs.prev_num, search=search_query, level=level) }}">Previous</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled">
@@ -56,7 +73,7 @@
                                   page_num == logs.pages or 
                                   (page_num >= logs.page - 2 and page_num <= logs.page + 2) %}
                                 <li class="page-item {% if page_num == logs.page %}active{% endif %}">
-                                    <a class="page-link" href="{{ url_for('view_logs', page=page_num) }}">{{ page_num }}</a>
+                                    <a class="page-link" href="{{ url_for('view_logs', page=page_num, search=search_query, level=level) }}">{{ page_num }}</a>
                                 </li>
                             {% elif page_num == logs.page - 3 or page_num == logs.page + 3 %}
                                 <li class="page-item disabled">
@@ -67,7 +84,7 @@
                         
                         {% if logs.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('view_logs', page=logs.next_num) }}">Next</a>
+                            <a class="page-link" href="{{ url_for('view_logs', page=logs.next_num, search=search_query, level=level) }}">Next</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled">

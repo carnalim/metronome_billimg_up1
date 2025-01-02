@@ -48,26 +48,17 @@ with app.app_context():
 class DatabaseHandler(logging.Handler):
     def emit(self, record):
         try:
-            # Ensure we're in an application context
-            if not app.app_context():
-                with app.app_context():
-                    self._emit(record)
-            else:
-                self._emit(record)
+            from flask import current_app
+            if current_app:
+                log_entry = LogEntry(
+                    level=record.levelname,
+                    message=self.format(record)
+                )
+                db.session.add(log_entry)
+                db.session.commit()
         except Exception as e:
-            print(f"Error in DatabaseHandler: {e}")
-    
-    def _emit(self, record):
-        try:
-            log_entry = LogEntry(
-                level=record.levelname,
-                message=self.format(record)
-            )
-            db.session.add(log_entry)
-            db.session.commit()
-        except Exception as e:
-            print(f"Error saving log to database: {e}")
-            db.session.rollback()
+            # Print to console if database logging fails
+            print(f"[{record.levelname}] {self.format(record)}")
 
 # Remove existing handlers
 root_logger = logging.getLogger()
@@ -147,7 +138,7 @@ def create_customer():
             }
             
             # Create customer in Stripe first
-            stripe.api_key = stripe_api_key
+            # stripe.api_key is already set globally
             try:
                 stripe_customer = stripe.Customer.create(
                     name=name,
@@ -203,11 +194,12 @@ def create_customer():
             }
             
             if response.status_code == 200:
-                metronome_customer = response.json()
+                response_data = response.json()
+                metronome_customer = response_data.get('data', {})
                 
                 # Save customer to local database
                 customer = Customer(
-                    metronome_id=metronome_customer['id'],
+                    metronome_id=metronome_customer.get('id'),
                     name=name,
                     salesforce_id=salesforce_id,
                     rate_card_id=rate_card_id,
@@ -223,6 +215,51 @@ def create_customer():
                     'customer_id': customer.id
                 }
                 
+                # Link customer to Stripe
+                link_payload = {
+                    "data": [{
+                        "customer_id": metronome_customer.get('id'),
+                        "billing_provider": "stripe",
+                        "configuration": {
+                            "stripe_customer_id": stripe_customer.id,
+                            "stripe_collection_method": "charge_automatically"
+                        },
+                        "delivery_method": "direct_to_billing_provider"
+                    }]
+                }
+                link_url = "https://api.metronome.com/v1/setCustomerBillingProviderConfigurations"
+                link_response = requests.post(
+                    link_url,
+                    headers={"Authorization": f"Bearer {metronome_api_key}"},
+                    json=link_payload
+                )
+                if link_response.status_code != 200:
+                    error_msg = f"Failed to link customer to Stripe: {link_response.text}"
+                    logging.error(error_msg)
+                    flash(error_msg, "danger")
+                    return render_template('create.html', rate_cards=rate_cards, response_data=response_data)
+
+                # Create contract if rate card was selected
+                if rate_card_id:
+                    current_date = datetime.now(timezone.utc)
+                    formatted_date = current_date.strftime("%Y-%m-%dT00:00:00.000Z")
+                    contract_payload = {
+                        "customer_id": metronome_customer.get('id'),
+                        "rate_card_id": rate_card_id,
+                        "starting_at": formatted_date
+                    }
+                    contract_url = "https://api.metronome.com/v1/contracts/create"
+                    contract_response = requests.post(
+                        contract_url,
+                        headers={"Authorization": f"Bearer {metronome_api_key}"},
+                        json=contract_payload
+                    )
+                    if contract_response.status_code not in [200, 201]:
+                        error_msg = f"Failed to create contract: {contract_response.text}"
+                        logging.error(error_msg)
+                        flash(error_msg, "danger")
+                        return render_template('create.html', rate_cards=rate_cards, response_data=response_data)
+
                 flash("Customer created successfully", "success")
             else:
                 # If Metronome creation fails, delete the Stripe customer
@@ -243,33 +280,28 @@ def create_customer():
                 flash(error_msg, "danger")
         
         # Get rate cards for the form
-        url = "https://api.metronome.com/v1/contract-pricing/rate-cards/list"
-        headers = {
-            "Authorization": f"Bearer {metronome_api_key}",
-            "Content-Type": "application/json"
-        }
+        api = MetronomeAPI(api_key=metronome_api_key)
+        print("Fetching rate cards...")
+        response_data = api._make_request("POST", "/contract-pricing/rate-cards/list", json={})
+        print(f"Rate cards response data: {json.dumps(response_data, indent=2)}")
+        logging.info(f"Rate cards response data: {json.dumps(response_data, indent=2)}")
         
-        logging.info("Fetching rate cards")
-        response = requests.post(url, headers=headers, json={})
-        logging.info(f"Rate cards response status: {response.status_code}")
-        logging.info(f"Rate cards response: {response.text}")
-        
-        if response.status_code == 200:
-            response_data = response.json()
-            if isinstance(response_data, dict):
-                rate_cards = response_data.get('data', [])
+        # Extract rate cards from response
+        if isinstance(response_data, dict):
+            if 'data' in response_data and isinstance(response_data['data'], list):
+                rate_cards = response_data['data']
             else:
-                rate_cards = response_data if isinstance(response_data, list) else []
-            
-            logging.info(f"Found {len(rate_cards)} rate cards")
-            
-            if not rate_cards:
-                flash("No rate cards found. Please create a rate card first.", "warning")
+                rate_cards = [response_data]
         else:
-            rate_cards = []
-            error_msg = f"Failed to fetch rate cards: {response.text}"
-            logging.error(error_msg)
-            flash(error_msg, "warning")
+            rate_cards = response_data if isinstance(response_data, list) else []
+        
+        print(f"Found {len(rate_cards)} rate cards")
+        print(f"Rate cards: {json.dumps(rate_cards, indent=2)}")
+        logging.info(f"Found {len(rate_cards)} rate cards")
+        logging.info(f"Rate cards: {json.dumps(rate_cards, indent=2)}")
+        
+        if not rate_cards:
+            flash("No rate cards found. Please create a rate card first.", "warning")
         
         return render_template('create.html', rate_cards=rate_cards, response_data=response_data)
         
@@ -285,31 +317,22 @@ def create_customer():
 def rate_cards():
     try:
         # Make API request
-        url = "https://api.metronome.com/v1/contract-pricing/rate-cards/list"
-        headers = {
-            "Authorization": f"Bearer {metronome_api_key}",
-            "Content-Type": "application/json"
-        }
-        
+        api = MetronomeAPI(api_key=metronome_api_key)
         logging.info("Fetching rate cards")
-        response = requests.post(url, headers=headers, json={})
-        logging.info(f"Rate cards response status: {response.status_code}")
-        logging.info(f"Rate cards response: {response.text}")
+        response_data = api._make_request("POST", "/contract-pricing/rate-cards/list", json={})
+        logging.info(f"Rate cards response data: {json.dumps(response_data, indent=2)}")
         
-        if response.status_code == 200:
-            response_data = response.json()
-            if isinstance(response_data, dict):
-                rate_cards = response_data.get('data', [])
+        # Extract rate cards from response
+        if isinstance(response_data, dict):
+            if 'data' in response_data and isinstance(response_data['data'], list):
+                rate_cards = response_data['data']
             else:
-                rate_cards = response_data if isinstance(response_data, list) else []
-            
-            logging.info(f"Found {len(rate_cards)} rate cards")
-            return render_template('rate_cards.html', rate_cards=rate_cards)
+                rate_cards = [response_data]
         else:
-            error_msg = f"Failed to fetch rate cards: {response.text}"
-            logging.error(error_msg)
-            flash(error_msg, 'danger')
-            return render_template('rate_cards.html', rate_cards=[])
+            rate_cards = response_data if isinstance(response_data, list) else []
+        
+        logging.info(f"Found {len(rate_cards)} rate cards")
+        return render_template('rate_cards.html', rate_cards=rate_cards)
             
     except Exception as e:
         error_msg = f"Error loading rate cards: {str(e)}"
@@ -324,25 +347,53 @@ def customers():
         # Get search and pagination parameters
         search_query = request.args.get('search', '').strip()
         page = request.args.get('page', 1, type=int)
-        per_page = 25
+        per_page = 20
         
-        # Make API request to list customers
-        response = requests.get(
-            "https://api.metronome.com/v1/customers",
-            headers={
-                "Authorization": f"Bearer {metronome_api_key}",
-            },
-        )
-        
-        logging.info(f"Customers response status: {response.status_code}")
-        logging.info(f"Customers response: {response.text}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            customers_list = data.get('data', []) if isinstance(data, dict) else data
+        # Fetch all customers from Metronome using pagination
+        all_customers = []
+        next_page = None
+        base_url = "https://api.metronome.com/v1/customers"
+        headers = {
+            "Authorization": f"Bearer {metronome_api_key}",
+            "Accept": "application/json"
+        }
+
+        while True:
+            # Make API request with pagination token if available
+            params = {"page_token": next_page} if next_page else {}
+            response = requests.get(base_url, headers=headers, params=params)
+            logging.info(f"Customers response status: {response.status_code}")
+            logging.info(f"Customers response: {response.text}")
             
-            # Update local database with customers
-            for customer_data in customers_list:
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if isinstance(data, dict):
+                        # Handle customer list response
+                        if 'data' in data and isinstance(data['data'], list):
+                            all_customers.extend(data['data'])
+                        
+                        # Get next page token
+                        next_page = data.get('next_page_token')
+                        if not next_page:
+                            break
+                    else:
+                        logging.error("Unexpected response format")
+                        break
+                except json.JSONDecodeError as e:
+                    logging.error(f"Failed to parse JSON response: {e}")
+                    break
+            else:
+                error_msg = f"Failed to fetch customers: {response.text}"
+                logging.error(error_msg)
+                flash(error_msg, "danger")
+                break
+        
+        # Update local database with all customers
+        if all_customers:
+            
+            # Update local database with all customers
+            for customer_data in all_customers:
                 customer_id = customer_data.get('id')
                 if not customer_id:
                     continue
@@ -376,7 +427,7 @@ def customers():
                     db.session.add(customer)
             
             db.session.commit()
-            logging.info(f"Updated {len(customers_list)} customers in database")
+            logging.info(f"Updated {len(all_customers)} customers in database")
             
             # Get updated customers from database with search filter and pagination
             query = Customer.query
@@ -527,21 +578,30 @@ def add_credits(customer_id):
         credit_types = []
         if active_contract and active_contract.get('rate_card_id'):
             rate_card_id = active_contract.get('rate_card_id')
-            rate_card_url = f"https://api.metronome.com/v1/contract-pricing/rate-cards/{rate_card_id}"
+            rate_card_url = "https://api.metronome.com/v1/rate-cards"
             rate_card_response = requests.get(
                 rate_card_url,
-                headers={"Authorization": f"Bearer {metronome_api_key}"}
+                headers={
+                    "Authorization": f"Bearer {metronome_api_key}",
+                    "Accept": "application/json"
+                }
             )
             if rate_card_response.status_code == 200:
-                rate_card = rate_card_response.json()
-                # Extract credit types from rate card pricing
-                pricing = rate_card.get('pricing', {})
-                for item in pricing.get('items', []):
-                    if item.get('credit_type_id'):
-                        credit_types.append({
-                            'id': item['credit_type_id'],
-                            'name': item.get('name', 'Unknown Credit Type')
-                        })
+                rate_cards = rate_card_response.json()
+                # Find the specific rate card
+                rate_card = next(
+                    (card for card in rate_cards.get('data', []) if card.get('id') == rate_card_id),
+                    None
+                )
+                if rate_card:
+                    # Extract credit types from rate card pricing
+                    pricing = rate_card.get('pricing', {})
+                    for item in pricing.get('items', []):
+                        if item.get('credit_type_id'):
+                            credit_types.append({
+                                'id': item['credit_type_id'],
+                                'name': item.get('name', 'Unknown Credit Type')
+                            })
         
         if not credit_types:
             flash("No credit types found in the rate card. Please ensure the customer has an active contract with a rate card.", "warning")

@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="mb-0">Preferences</h2>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('save_preferences') }}">
+            <div class="mb-3">
+                <label for="metronome_api_key" class="form-label">Metronome API Key</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="metronome_api_key" name="metronome_api_key" 
+                           value="{{ metronome_api_key }}" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('metronome_api_key')">
+                        Show/Hide
+                    </button>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="stripe_api_key" class="form-label">Stripe API Key</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="stripe_api_key" name="stripe_api_key" 
+                           value="{{ stripe_api_key }}" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('stripe_api_key')">
+                        Show/Hide
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function togglePassword(elementId) {
+    const input = document.getElementById(elementId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}

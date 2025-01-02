@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Add Credits to Customer: {{ customer.name }}</h2>
+    </div>
+    <div class="card-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if active_contract %}
+            <div class="alert alert-info">
+                <h5>Active Contract Details:</h5>
+                <p>Product: {{ active_contract.product_id }}</p>
+                <p>Rate Card: {{ active_contract.rate_card_id }}</p>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                No active contract found for this customer. Credits can only be added to customers with active contracts.
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">Credit Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="priority" class="form-label">Priority</label>
+                <input type="number" class="form-control" id="priority" name="priority" value="100" required>
+                <div class="form-text">Higher priority credits are used first</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="product_id" class="form-label">Product</label>
+                <select class="form-select" id="product_id" name="product_id" required>
+                    {% if products %}
+                        {% for product in products %}
+                        <option value="{{ product.id }}"{% if active_contract and active_contract.product_id == product.id %} selected{% endif %}>
+                            {{ product.name }} ({{ product.id }})
+                        </option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">No products available</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="credit_type_id" class="form-label">Credit Type</label>
+                <select class="form-select" id="credit_type_id" name="credit_type_id" required>
+                    {% if credit_types %}
+                        {% for credit_type in credit_types %}
+                        <option value="{{ credit_type.id }}">{{ credit_type.name }} ({{ credit_type.id }})</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">No credit types available</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="amount" class="form-label">Amount</label>
+                <input type="number" class="form-control" id="amount" name="amount" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="starting_at" class="form-label">Starting At</label>
+                <input type="datetime-local" class="form-control" id="starting_at" name="starting_at" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="ending_before" class="form-label">Ending Before</label>
+                <input type="datetime-local" class="form-control" id="ending_before" name="ending_before" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary"{% if not active_contract or not products or not credit_types %} disabled{% endif %}>Add Credits</button>
+            <a href="{{ url_for('customers') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

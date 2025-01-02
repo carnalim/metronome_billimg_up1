@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>Rate Cards</h2>
+    </div>
+    <div class="card-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if rate_cards %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for card in rate_cards %}
+                            <tr>
+                                <td>{{ card.id }}</td>
+                                <td>{{ card.get('name', 'Unnamed Rate Card') }}</td>
+                                <td>{{ card.get('description', 'No description') }}</td>
+                                <td>
+                                    <span class="badge {% if card.get('status') == 'active' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ card.get('status', 'unknown') }}
+                                    </span>
+                                </td>
+                                <td>{{ card.get('created_at', 'Unknown') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No rate cards found.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

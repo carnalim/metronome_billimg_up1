@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Create Customer</h2>
+    </div>
+    <div class="card-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">Customer Name *</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="name" 
+                       name="name" 
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label for="salesforce_id" class="form-label">Salesforce ID</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="salesforce_id" 
+                       name="salesforce_id">
+                <div class="form-text">Optional: Link this customer to a Salesforce account</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="rate_card_id" class="form-label">Rate Card</label>
+                <select class="form-select" id="rate_card_id" name="rate_card_id">
+                    <option value="">Select a rate card...</option>
+                    {% for card in rate_cards %}
+                        <option value="{{ card.id }}">
+                            {{ card.name }} ({{ card.id }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Optional: Assign a rate card to this customer</div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('customers') }}" class="btn btn-secondary">Back to Customers</a>
+                <button type="submit" class="btn btn-primary">Create Customer</button>
+            </div>
+        </form>
+
+        {% if response_data %}
+            <div class="mt-4">
+                <h3>API Response Details</h3>
+                
+                {% if response_data.get('form_data') %}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Form Data</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0"><code>{{ response_data.form_data | tojson(indent=2) }}</code></pre>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if response_data.get('stripe') %}
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Stripe Response</h5>
+                            <span class="badge {% if response_data.stripe.success %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ 'Success' if response_data.stripe.success else 'Failed' }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0"><code>{{ response_data.stripe | tojson(indent=2) }}</code></pre>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if response_data.get('metronome_request') %}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Metronome Request</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0"><code>{{ response_data.metronome_request | tojson(indent=2) }}</code></pre>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if response_data.get('metronome') %}
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Metronome Response</h5>
+                            <span class="badge {% if response_data.metronome.success %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ response_data.metronome.status_code }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0"><code>{{ response_data.metronome | tojson(indent=2) }}</code></pre>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if response_data.get('database') %}
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Database Update</h5>
+                            <span class="badge {% if response_data.database.success %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ 'Success' if response_data.database.success else 'Failed' }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0"><code>{{ response_data.database | tojson(indent=2) }}</code></pre>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if response_data.get('stripe_cleanup') %}
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Stripe Cleanup</h5>
+                            <span class="badge {% if response_data.stripe_cleanup.success %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ 'Success' if response_data.stripe_cleanup.success else 'Failed' }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0"><code>{{ response_data.stripe_cleanup | tojson(indent=2) }}</code></pre>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if response_data.get('error') %}
+                    <div class="card mb-3 border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">Error</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0"><code>{{ response_data.error }}</code></pre>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0;
+}
+code {
+    color: #212529;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+.badge {
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

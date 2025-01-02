@@ -8,3 +8,511 @@
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 633-740-031
+2025-01-01 20:57:37 [WARNING]  * Debugger is active!
+2025-01-01 20:57:37 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 20:57:49 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 20:57:49 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 20:57:49 [INFO]  * Restarting with stat
+2025-01-01 20:57:50 [WARNING]  * Debugger is active!
+2025-01-01 20:57:50 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 20:57:58 [INFO] 127.0.0.1 - - [01/Jan/2025 20:57:58] "GET /create HTTP/1.1" 200 -
+2025-01-01 20:57:59 [INFO] 127.0.0.1 - - [01/Jan/2025 20:57:59] "GET /logs HTTP/1.1" 200 -
+2025-01-01 20:58:02 [INFO] 127.0.0.1 - - [01/Jan/2025 20:58:02] "GET /create HTTP/1.1" 200 -
+2025-01-01 20:58:13 [INFO] Making request to Metronome API...
+2025-01-01 20:58:13 [INFO] URL: https://api.metronome.com/v1/customers
+2025-01-01 20:58:13 [INFO] Data: {"name": "Matt_Cust55", "external_id": "565d0a4d-0286-4e9e-b219-03e68fc217b6", "customer_config": {"salesforce_account_id": "eee8659d-6cda-413d-a8c0-adb1e83d2b5e"}}
+2025-01-01 20:58:13 [INFO] Metronome Response Status: 200
+2025-01-01 20:58:13 [INFO] Metronome Response: {"data":{"external_id":"565d0a4d-0286-4e9e-b219-03e68fc217b6","id":"1c7814fa-6b08-441c-99ed-f0a897374c9e","name":"Matt_Cust55","ingest_aliases":["565d0a4d-0286-4e9e-b219-03e68fc217b6"],"custom_fields":{}}}
+2025-01-01 20:58:13 [INFO] Successfully created Metronome customer with ID: 1c7814fa-6b08-441c-99ed-f0a897374c9e
+2025-01-01 20:58:13 [INFO] message='Request to Stripe api' method=post url=https://api.stripe.com/v1/customers
+2025-01-01 20:58:14 [INFO] message='Stripe API response' path=https://api.stripe.com/v1/customers response_code=200
+2025-01-01 20:58:14 [INFO] Successfully created Stripe customer with ID: cus_RVhtAaHboYSaW0
+2025-01-01 20:58:14 [INFO] Link Response Status: 200
+2025-01-01 20:58:14 [INFO] Link Response: 
+2025-01-01 20:58:14 [INFO] Successfully linked Metronome customer to Stripe
+2025-01-01 20:58:14 [INFO] 127.0.0.1 - - [01/Jan/2025 20:58:14] "[32mPOST /create_customer HTTP/1.1[0m" 302 -
+2025-01-01 20:58:14 [INFO] 127.0.0.1 - - [01/Jan/2025 20:58:14] "GET /create HTTP/1.1" 200 -
+2025-01-01 20:58:15 [INFO] 127.0.0.1 - - [01/Jan/2025 20:58:15] "GET /logs HTTP/1.1" 200 -
+2025-01-01 21:02:38 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:02:38 [INFO]  * Restarting with stat
+2025-01-01 21:02:39 [WARNING]  * Debugger is active!
+2025-01-01 21:02:39 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:04:08 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:04:08 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:04:08 [INFO]  * Restarting with stat
+2025-01-01 21:04:08 [WARNING]  * Debugger is active!
+2025-01-01 21:04:08 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:04:13 [INFO] 127.0.0.1 - - [01/Jan/2025 21:04:13] "GET /logs HTTP/1.1" 200 -
+2025-01-01 21:04:15 [INFO] 127.0.0.1 - - [01/Jan/2025 21:04:15] "GET /logs HTTP/1.1" 200 -
+2025-01-01 21:04:16 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rate_cards
+2025-01-01 21:04:16 [INFO] 127.0.0.1 - - [01/Jan/2025 21:04:16] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:04:18 [INFO] 127.0.0.1 - - [01/Jan/2025 21:04:18] "GET /preferences HTTP/1.1" 200 -
+2025-01-01 21:05:01 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rate_cards
+2025-01-01 21:05:01 [INFO] 127.0.0.1 - - [01/Jan/2025 21:05:01] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:05:46 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:05:46 [INFO]  * Restarting with stat
+2025-01-01 21:05:47 [WARNING]  * Debugger is active!
+2025-01-01 21:05:47 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:06:11 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:06:11 [INFO]  * Restarting with stat
+2025-01-01 21:06:12 [WARNING]  * Debugger is active!
+2025-01-01 21:06:12 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:06:22 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:06:22 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:06:22 [INFO]  * Restarting with stat
+2025-01-01 21:06:22 [WARNING]  * Debugger is active!
+2025-01-01 21:06:22 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:06:25 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rateCards
+2025-01-01 21:06:25 [INFO] 127.0.0.1 - - [01/Jan/2025 21:06:25] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:06:27 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rateCards
+2025-01-01 21:06:27 [INFO] 127.0.0.1 - - [01/Jan/2025 21:06:27] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:06:28 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rateCards
+2025-01-01 21:06:28 [INFO] 127.0.0.1 - - [01/Jan/2025 21:06:28] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:06:28 [INFO] 127.0.0.1 - - [01/Jan/2025 21:06:28] "GET /preferences HTTP/1.1" 200 -
+2025-01-01 21:06:33 [INFO] 127.0.0.1 - - [01/Jan/2025 21:06:33] "GET /logs HTTP/1.1" 200 -
+2025-01-01 21:06:34 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rateCards
+2025-01-01 21:06:34 [INFO] 127.0.0.1 - - [01/Jan/2025 21:06:34] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:06:35 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rateCards
+2025-01-01 21:06:35 [INFO] 127.0.0.1 - - [01/Jan/2025 21:06:35] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:06:39 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rateCards
+2025-01-01 21:06:39 [INFO] 127.0.0.1 - - [01/Jan/2025 21:06:39] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:07:31 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:07:31 [INFO]  * Restarting with stat
+2025-01-01 21:07:32 [WARNING]  * Debugger is active!
+2025-01-01 21:07:32 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:07:43 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:07:43 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:07:43 [INFO]  * Restarting with stat
+2025-01-01 21:07:43 [WARNING]  * Debugger is active!
+2025-01-01 21:07:43 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:07:50 [INFO] Fetching rate cards from: https://app.metronome.com/api/v1/rateCards
+2025-01-01 21:07:51 [INFO] Response status: 200
+2025-01-01 21:07:51 [INFO] Response body: <!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" type="image/png" href="/favicon.ico"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="Metronome"/><title>Metronome</title><style>* {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        borde
+2025-01-01 21:07:51 [ERROR] Error fetching rate cards: Expecting value: line 1 column 1 (char 0)
+2025-01-01 21:07:51 [INFO] 127.0.0.1 - - [01/Jan/2025 21:07:51] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:07:53 [INFO] 127.0.0.1 - - [01/Jan/2025 21:07:53] "GET / HTTP/1.1" 200 -
+2025-01-01 21:07:54 [INFO] Fetching rate cards from: https://app.metronome.com/api/v1/rateCards
+2025-01-01 21:07:54 [INFO] Response status: 200
+2025-01-01 21:07:54 [INFO] Response body: <!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" type="image/png" href="/favicon.ico"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="Metronome"/><title>Metronome</title><style>* {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        borde
+2025-01-01 21:07:54 [ERROR] Error fetching rate cards: Expecting value: line 1 column 1 (char 0)
+2025-01-01 21:07:54 [INFO] 127.0.0.1 - - [01/Jan/2025 21:07:54] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:07:55 [INFO] Fetching rate cards from: https://app.metronome.com/api/v1/rateCards
+2025-01-01 21:07:55 [INFO] Response status: 200
+2025-01-01 21:07:55 [INFO] Response body: <!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" type="image/png" href="/favicon.ico"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="description" content="Metronome"/><title>Metronome</title><style>* {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        borde
+2025-01-01 21:07:55 [ERROR] Error fetching rate cards: Expecting value: line 1 column 1 (char 0)
+2025-01-01 21:07:55 [INFO] 127.0.0.1 - - [01/Jan/2025 21:07:55] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:08:46 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:08:46 [INFO]  * Restarting with stat
+2025-01-01 21:08:47 [WARNING]  * Debugger is active!
+2025-01-01 21:08:47 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:09:07 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:09:07 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:09:07 [INFO]  * Restarting with stat
+2025-01-01 21:09:08 [WARNING]  * Debugger is active!
+2025-01-01 21:09:08 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:09:10 [INFO] Fetching rate cards from: https://api.metronome.com/v1/rateCards
+2025-01-01 21:09:10 [INFO] Headers: {'Authorization': 'Bearer 48b0453c99607fb5dfb4dc717ab2d9a2b6cc0dabec7885228871bc8c42748ccf', 'Content-Type': 'application/json', 'Accept': 'application/json'}
+2025-01-01 21:09:10 [INFO] Response status: 404
+2025-01-01 21:09:10 [INFO] Response body: {"message" : "Resource not found"}
+2025-01-01 21:09:10 [INFO] Trying alternate URL: https://api.metronome.com/v1/rate-cards
+2025-01-01 21:09:10 [INFO] Alternate response status: 404
+2025-01-01 21:09:10 [INFO] Alternate response body: {"message" : "Resource not found"}
+2025-01-01 21:09:10 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rate-cards
+2025-01-01 21:09:10 [INFO] 127.0.0.1 - - [01/Jan/2025 21:09:10] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:09:12 [INFO] Fetching rate cards from: https://api.metronome.com/v1/rateCards
+2025-01-01 21:09:12 [INFO] Headers: {'Authorization': 'Bearer 48b0453c99607fb5dfb4dc717ab2d9a2b6cc0dabec7885228871bc8c42748ccf', 'Content-Type': 'application/json', 'Accept': 'application/json'}
+2025-01-01 21:09:12 [INFO] Response status: 404
+2025-01-01 21:09:12 [INFO] Response body: {"message" : "Resource not found"}
+2025-01-01 21:09:12 [INFO] Trying alternate URL: https://api.metronome.com/v1/rate-cards
+2025-01-01 21:09:12 [INFO] Alternate response status: 404
+2025-01-01 21:09:12 [INFO] Alternate response body: {"message" : "Resource not found"}
+2025-01-01 21:09:12 [ERROR] Error fetching rate cards: 404 Client Error: Not Found for url: https://api.metronome.com/v1/rate-cards
+2025-01-01 21:09:12 [INFO] 127.0.0.1 - - [01/Jan/2025 21:09:12] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:10:00 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:10:00 [INFO]  * Restarting with stat
+2025-01-01 21:10:01 [WARNING]  * Debugger is active!
+2025-01-01 21:10:01 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:10:11 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:10:11 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:10:11 [INFO]  * Restarting with stat
+2025-01-01 21:10:11 [WARNING]  * Debugger is active!
+2025-01-01 21:10:11 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:10:15 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:10:15 [INFO] Headers: {'Authorization': 'Bearer 48b0453c99607fb5dfb4dc717ab2d9a2b6cc0dabec7885228871bc8c42748ccf', 'Content-Type': 'application/json', 'Accept': 'application/json'}
+2025-01-01 21:10:15 [INFO] Response status: 200
+2025-01-01 21:10:15 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:10:15 [ERROR] Error fetching rate cards: 'str' object cannot be interpreted as an integer
+2025-01-01 21:10:15 [INFO] 127.0.0.1 - - [01/Jan/2025 21:10:15] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:10:16 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:10:16 [INFO] Headers: {'Authorization': 'Bearer 48b0453c99607fb5dfb4dc717ab2d9a2b6cc0dabec7885228871bc8c42748ccf', 'Content-Type': 'application/json', 'Accept': 'application/json'}
+2025-01-01 21:10:16 [INFO] Response status: 200
+2025-01-01 21:10:16 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:10:16 [ERROR] Error fetching rate cards: 'str' object cannot be interpreted as an integer
+2025-01-01 21:10:16 [INFO] 127.0.0.1 - - [01/Jan/2025 21:10:16] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:10:17 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:10:17 [INFO] Headers: {'Authorization': 'Bearer 48b0453c99607fb5dfb4dc717ab2d9a2b6cc0dabec7885228871bc8c42748ccf', 'Content-Type': 'application/json', 'Accept': 'application/json'}
+2025-01-01 21:10:17 [INFO] Response status: 200
+2025-01-01 21:10:17 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:10:17 [ERROR] Error fetching rate cards: 'str' object cannot be interpreted as an integer
+2025-01-01 21:10:17 [INFO] 127.0.0.1 - - [01/Jan/2025 21:10:17] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:10:39 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:10:39 [INFO]  * Restarting with stat
+2025-01-01 21:10:40 [WARNING]  * Debugger is active!
+2025-01-01 21:10:40 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:10:51 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:10:51 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:10:51 [INFO]  * Restarting with stat
+2025-01-01 21:10:52 [WARNING]  * Debugger is active!
+2025-01-01 21:10:52 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:11:00 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:11:00 [INFO] Headers: {'Authorization': 'Bearer 48b0453c99607fb5dfb4dc717ab2d9a2b6cc0dabec7885228871bc8c42748ccf', 'Content-Type': 'application/json', 'Accept': 'application/json'}
+2025-01-01 21:11:00 [INFO] Response status: 200
+2025-01-01 21:11:00 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:11:00 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {}
+  }
+]
+2025-01-01 21:11:00 [INFO] 127.0.0.1 - - [01/Jan/2025 21:11:00] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:11:49 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:11:50 [INFO]  * Restarting with stat
+2025-01-01 21:11:50 [WARNING]  * Debugger is active!
+2025-01-01 21:11:50 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:13:04 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:13:04 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:13:04 [INFO]  * Restarting with stat
+2025-01-01 21:13:05 [WARNING]  * Debugger is active!
+2025-01-01 21:13:05 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:13:11 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:13:12 [INFO] Response status: 200
+2025-01-01 21:13:12 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:13:12 [INFO] Prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: []
+2025-01-01 21:13:12 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:13:12 [INFO] 127.0.0.1 - - [01/Jan/2025 21:13:12] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:13:13 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:13:13 [INFO] Response status: 200
+2025-01-01 21:13:13 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:13:13 [INFO] Prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: []
+2025-01-01 21:13:13 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:13:13 [INFO] 127.0.0.1 - - [01/Jan/2025 21:13:13] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:13:17 [INFO] 127.0.0.1 - - [01/Jan/2025 21:13:17] "GET /create HTTP/1.1" 200 -
+2025-01-01 21:14:15 [INFO] 127.0.0.1 - - [01/Jan/2025 21:14:15] "GET /logs HTTP/1.1" 200 -
+2025-01-01 21:14:33 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:14:33 [INFO] Response status: 200
+2025-01-01 21:14:33 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:14:34 [INFO] Prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: []
+2025-01-01 21:14:34 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:14:34 [INFO] 127.0.0.1 - - [01/Jan/2025 21:14:34] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:14:34 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:14:34 [INFO] Response status: 200
+2025-01-01 21:14:34 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:14:34 [INFO] Prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: []
+2025-01-01 21:14:34 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:14:34 [INFO] 127.0.0.1 - - [01/Jan/2025 21:14:34] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:14:53 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:14:53 [INFO]  * Restarting with stat
+2025-01-01 21:14:53 [WARNING]  * Debugger is active!
+2025-01-01 21:14:53 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:16:40 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:16:41 [INFO]  * Restarting with stat
+2025-01-01 21:16:41 [WARNING]  * Debugger is active!
+2025-01-01 21:16:41 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:16:53 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:16:53 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:16:53 [INFO]  * Restarting with stat
+2025-01-01 21:16:53 [WARNING]  * Debugger is active!
+2025-01-01 21:16:53 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:16:56 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:16:56 [INFO] Response status: 200
+2025-01-01 21:16:56 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:16:56 [INFO] Prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: []
+2025-01-01 21:16:56 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:16:56 [INFO] 127.0.0.1 - - [01/Jan/2025 21:16:56] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:16:58 [INFO] 127.0.0.1 - - [01/Jan/2025 21:16:58] "GET /create HTTP/1.1" 200 -
+2025-01-01 21:17:03 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:03] "GET /usage HTTP/1.1" 200 -
+2025-01-01 21:17:05 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:17:05 [INFO] Response status: 200
+2025-01-01 21:17:05 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:17:05 [INFO] Prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: []
+2025-01-01 21:17:05 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:17:05 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:05] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:17:08 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:08] "GET /create HTTP/1.1" 200 -
+2025-01-01 21:17:16 [INFO] Making request to Metronome API...
+2025-01-01 21:17:16 [INFO] URL: https://api.metronome.com/v1/customers
+2025-01-01 21:17:16 [INFO] Data: {"name": "Matt1010101", "external_id": "c80a9b02-92a1-40cb-b21e-fbf7461a90af", "customer_config": {"salesforce_account_id": "1c155cdb-4339-4eb7-9f70-a872dc19ef27"}}
+2025-01-01 21:17:16 [INFO] Metronome Response Status: 200
+2025-01-01 21:17:16 [INFO] Metronome Response: {"data":{"external_id":"c80a9b02-92a1-40cb-b21e-fbf7461a90af","id":"f8b85798-8b64-4cd2-9343-55b1283b1b86","name":"Matt1010101","ingest_aliases":["c80a9b02-92a1-40cb-b21e-fbf7461a90af"],"custom_fields":{}}}
+2025-01-01 21:17:16 [INFO] Successfully created Metronome customer with ID: f8b85798-8b64-4cd2-9343-55b1283b1b86
+2025-01-01 21:17:16 [INFO] message='Request to Stripe api' method=post url=https://api.stripe.com/v1/customers
+2025-01-01 21:17:16 [INFO] message='Stripe API response' path=https://api.stripe.com/v1/customers response_code=200
+2025-01-01 21:17:16 [INFO] Successfully created Stripe customer with ID: cus_RViCfkya6P6tyN
+2025-01-01 21:17:16 [INFO] Link Response Status: 200
+2025-01-01 21:17:16 [INFO] Link Response: 
+2025-01-01 21:17:17 [INFO] Successfully created contract: {
+  "data": {
+    "id": "9feb7b75-b986-414c-810b-702b603f0a8b"
+  }
+}
+2025-01-01 21:17:17 [INFO] Successfully linked customer to Stripe and created contract
+2025-01-01 21:17:17 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:17] "[32mPOST /create_customer HTTP/1.1[0m" 302 -
+2025-01-01 21:17:17 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:17] "GET /create HTTP/1.1" 200 -
+2025-01-01 21:17:35 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:35] "GET /usage HTTP/1.1" 200 -
+2025-01-01 21:17:38 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:38] "GET /create HTTP/1.1" 200 -
+2025-01-01 21:17:40 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:40] "GET /usage HTTP/1.1" 200 -
+2025-01-01 21:17:52 [INFO] 127.0.0.1 - - [01/Jan/2025 21:17:52] "POST /generate_usage HTTP/1.1" 200 -
+2025-01-01 21:19:34 [INFO] 127.0.0.1 - - [01/Jan/2025 21:19:34] "GET /usage HTTP/1.1" 200 -
+2025-01-01 21:19:53 [INFO] 127.0.0.1 - - [01/Jan/2025 21:19:53] "[32mPOST /generate_usage HTTP/1.1[0m" 302 -
+2025-01-01 21:19:53 [INFO] 127.0.0.1 - - [01/Jan/2025 21:19:53] "GET /usage HTTP/1.1" 200 -
+2025-01-01 21:20:05 [INFO] 127.0.0.1 - - [01/Jan/2025 21:20:05] "POST /generate_usage HTTP/1.1" 200 -
+2025-01-01 21:20:15 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:20:15 [INFO] Response status: 200
+2025-01-01 21:20:15 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:20:15 [INFO] Prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: []
+2025-01-01 21:20:15 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:20:15 [INFO] 127.0.0.1 - - [01/Jan/2025 21:20:15] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:21:12 [INFO] 127.0.0.1 - - [01/Jan/2025 21:21:12] "GET /logs HTTP/1.1" 200 -
+2025-01-01 21:21:19 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:21:19 [INFO]  * Restarting with stat
+2025-01-01 21:21:20 [WARNING]  * Debugger is active!
+2025-01-01 21:21:20 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:21:38 [INFO] 127.0.0.1 - - [01/Jan/2025 21:21:38] "GET /logs HTTP/1.1" 200 -
+2025-01-01 21:21:49 [INFO] 127.0.0.1 - - [01/Jan/2025 21:21:49] "GET /create HTTP/1.1" 200 -
+2025-01-01 21:21:51 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:21:51 [INFO] Response status: 200
+2025-01-01 21:21:51 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:21:51 [ERROR] Error fetching prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: {"message" : "Resource not found"}
+2025-01-01 21:21:51 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:21:51 [INFO] 127.0.0.1 - - [01/Jan/2025 21:21:51] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:23:04 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8082
+ * Running on http://192.168.68.62:8082
+2025-01-01 21:23:04 [INFO] [33mPress CTRL+C to quit[0m
+2025-01-01 21:23:04 [INFO]  * Restarting with stat
+2025-01-01 21:23:04 [WARNING]  * Debugger is active!
+2025-01-01 21:23:04 [INFO]  * Debugger PIN: 119-131-082
+2025-01-01 21:23:10 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:23:10 [INFO] Response status: 200
+2025-01-01 21:23:10 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:23:10 [ERROR] Error fetching prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: {"message" : "Resource not found"}
+2025-01-01 21:23:10 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:23:10 [INFO] 127.0.0.1 - - [01/Jan/2025 21:23:10] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:23:12 [INFO] Fetching rate cards from: https://api.metronome.com/v1/contract-pricing/rate-cards/list
+2025-01-01 21:23:12 [INFO] Response status: 200
+2025-01-01 21:23:12 [INFO] Response body: {"data":[{"id":"ee186f96-3e72-4f7c-a326-a88a28e4b7da","name":"Parasail List Prices","description":"","fiat_credit_type":{"id":"2714e483-4ff1-48e4-9e25-ac732e8f24f2","name":"USD (cents)"},"credit_type_conversions":[],"created_at":"2024-12-05T18:34:44.919000+00:00","created_by":"Metronome Team","aliases":[],"custom_fields":{}}],"next_page":null}
+2025-01-01 21:23:12 [ERROR] Error fetching prices for rate card ee186f96-3e72-4f7c-a326-a88a28e4b7da: {"message" : "Resource not found"}
+2025-01-01 21:23:12 [INFO] Processed rate cards: [
+  {
+    "id": "ee186f96-3e72-4f7c-a326-a88a28e4b7da",
+    "name": "Parasail List Prices",
+    "description": "",
+    "fiat_credit_type": {
+      "id": "2714e483-4ff1-48e4-9e25-ac732e8f24f2",
+      "name": "USD (cents)"
+    },
+    "credit_type_conversions": [],
+    "created_at": "2024-12-05 18:34:44",
+    "created_by": "Metronome Team",
+    "aliases": [],
+    "custom_fields": {},
+    "prices": []
+  }
+]
+2025-01-01 21:23:12 [INFO] 127.0.0.1 - - [01/Jan/2025 21:23:12] "GET /rate-cards HTTP/1.1" 200 -
+2025-01-01 21:23:16 [INFO] 127.0.0.1 - - [01/Jan/2025 21:23:16] "GET /logs HTTP/1.1" 200 -
+2025-01-01 21:24:44 [INFO]  * Detected change in '/Users/matthewcarnali/Repo/metronome_billing_up1/website/app.py', reloading
+2025-01-01 21:24:44 [INFO]  * Restarting with stat

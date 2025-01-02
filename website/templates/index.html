@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metronome Billing Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Metronome Billing Dashboard</h1>
+        <div class="dashboard">
+            <div class="card">
+                <h2>Total Customers</h2>
+                <p class="number">{{ total_customers }}</p>
+            </div>
+            <div class="card">
+                <h2>Active Customers</h2>
+                <p class="number">{{ active_customers }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

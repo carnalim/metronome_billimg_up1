@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>Customers</h2>
+        <div>
+            <a href="{{ url_for('customers') }}" class="btn btn-secondary">Refresh</a>
+            <a href="{{ url_for('create_customer') }}" class="btn btn-primary">Create Customer</a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if customers %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Rate Card</th>
+                            <th>Salesforce ID</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                            <tr>
+                                <td>{{ customer.metronome_id }}</td>
+                                <td>{{ customer.name }}</td>
+                                <td>
+                                    <span class="badge {% if customer.status == 'active' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ customer.status }}
+                                    </span>
+                                </td>
+                                <td>{{ customer.rate_card_id or 'N/A' }}</td>
+                                <td>{{ customer.salesforce_id or 'N/A' }}</td>
+                                <td>{{ customer.created_at or 'N/A' }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('add_credits', customer_id=customer.metronome_id) }}" class="btn btn-sm btn-primary">Add Credits</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No customers found. <a href="{{ url_for('create_customer') }}">Create a customer</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Generate Usage Data</h2>
+            </div>
+            <div class="card-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <form method="POST" action="{{ url_for('generate_usage') }}">
+                    <div class="mb-3">
+                        <label for="customer_id" class="form-label">Customer ID</label>
+                        <input type="text" class="form-control" id="customer_id" name="customer_id" required>
+                        <div class="form-text">Enter the Metronome customer ID to generate usage data for</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="days" class="form-label">Days of Usage</label>
+                        <input type="number" class="form-control" id="days" name="days" value="7" min="1" max="30" required>
+                        <div class="form-text">Number of days to generate usage data for (1-30)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="events_per_day" class="form-label">Events Per Day</label>
+                        <input type="number" class="form-control" id="events_per_day" name="events_per_day" value="20" min="1" max="100" required>
+                        <div class="form-text">Average number of events to generate per day (1-100)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Event Types</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="token_usage" name="event_types" value="token_usage" checked>
+                            <label class="form-check-label" for="token_usage">Token Usage</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="gpu_usage" name="event_types" value="gpu_usage" checked>
+                            <label class="form-check-label" for="gpu_usage">GPU Usage</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Generate Usage</button>
+                </form>
+                
+                {% if events %}
+                <div class="mt-4">
+                    <h4>Generated Events</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Event Type</th>
+                                    <th>Timestamp</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in events %}
+                                <tr>
+                                    <td>{{ event.event_type }}</td>
+                                    <td>{{ event.timestamp }}</td>
+                                    <td>
+                                        <pre class="mb-0"><code>{{ event.properties | tojson(indent=2) }}</code></pre>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1059,7 +1059,7 @@ def refresh_database():
             # Make API request with pagination token if available
             params = {}
             if next_page:
-                params["page_token"] = next_page  # Using correct parameter name from API docs
+                params["next_page"] = next_page  # Using correct parameter name from API docs
                 logging.info(f"Fetching next page with token: {next_page}")
             
             response = requests.get(base_url, headers=headers, params=params)
@@ -1067,29 +1067,36 @@ def refresh_database():
             logging.info(f"Customers response status: {response.status_code}")
             
             if response.status_code == 200:
-                data = response.json()
-                if isinstance(data, dict):
-                    # Handle customer list response
-                    if 'data' in data and isinstance(data['data'], list):
-                        current_page_customers = len(data['data'])
-                        all_customers.extend(data['data'])
-                        logging.info(f"Fetched {current_page_customers} customers (total: {len(all_customers)})")
+                try:
+                    data = response.json()
+                    if not isinstance(data, dict):
+                        logging.error("Unexpected response format - not a dictionary")
+                        break
+                        
+                    if 'data' not in data or not isinstance(data['data'], list):
+                        logging.error("Unexpected response format - missing data array")
+                        break
+                        
+                    # Add customers from current page
+                    current_page_customers = len(data['data'])
+                    all_customers.extend(data['data'])
+                    logging.info(f"Fetched {current_page_customers} customers (total: {len(all_customers)})")
+                    
+                    # Log the current data structure for debugging
+                    logging.info(f"Response data structure: {json.dumps(data, indent=2)}")
                     
                     # Get next page token
-                    next_page = data.get('next_page_token')  # Using correct field name from API docs
+                    next_page = data.get('next_page')  # API returns 'next_page', not 'next_page_token'
                     if next_page:
-                        logging.info(f"Found next page token, continuing to next page")
+                        logging.info(f"Found next page token: {next_page}, continuing to next page")
+                        # Add a small delay between requests to avoid rate limiting
+                        time.sleep(0.5)
+                        continue  # Continue to next iteration to fetch next page
                     else:
                         logging.info("No more pages to fetch")
                         break
-
-                    # Log the current data structure
-                    logging.info(f"Response data structure: {json.dumps(data, indent=2)}")
-
-                    # Add a small delay between requests to avoid rate limiting
-                    time.sleep(0.5)
-                else:
-                    logging.error("Unexpected response format")
+                except json.JSONDecodeError as e:
+                    logging.error(f"Failed to parse JSON response: {e}")
                     break
             else:
                 error_msg = f"Failed to fetch customers: {response.text}"

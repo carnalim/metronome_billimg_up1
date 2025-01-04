@@ -21,7 +21,13 @@
             {% for contract in contracts %}
             <tr>
                 <td>{{ contract.id }}</td>
-                <td>{{ contract.customer_name }}</td>
+                <td>
+                    {% if contract.customer_id %}
+                        <a href="{{ url_for('customers') }}?search={{ contract.customer_id }}">{{ contract.customer_name }}</a>
+                    {% else %}
+                        {{ contract.customer_name }}
+                    {% endif %}
+                </td>
                 <td>{{ contract.name }}</td>
                 <td>{{ contract.product_name }}</td>
                 <td>{{ contract.rate_card_name }}</td>

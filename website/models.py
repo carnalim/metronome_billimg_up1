@@ -1,5 +1,5 @@
 from datetime import datetime
-from . import db
+from website import db
 
 class LogEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)

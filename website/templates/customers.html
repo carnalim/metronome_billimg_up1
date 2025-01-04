@@ -144,9 +144,7 @@ $(document).ready(function() {
                                 <td>{{ customer.salesforce_id or 'N/A' }}</td>
                                 <td>{{ customer.created_at or 'N/A' }}</td>
                                 <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="{{ url_for('add_credits', customer_id=customer.metronome_id) }}" class="btn btn-sm btn-primary">Add Credits</a>
-                                    </div>
+                                    <!-- Actions column intentionally left empty -->
                                 </td>
                             </tr>
                         {% endfor %}

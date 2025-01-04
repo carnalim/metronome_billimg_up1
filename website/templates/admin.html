@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Admin Dashboard</h2>
+    
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Database Management</h5>
+            <p class="card-text">Use this section to manage the database and refresh customer data.</p>
+            <div class="mb-3">
+                <strong>Current Customer Count:</strong> {{ customer_count }}
+            </div>
+            <form action="{{ url_for('refresh_database') }}" method="post">
+                <button type="submit" class="btn btn-primary">Refresh Customer Database</button>
+            </form>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-3">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}

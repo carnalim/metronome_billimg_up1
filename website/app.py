@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import numpy as np
+import time
 from website.models import db, LogEntry, Customer
 
 sys.path.append(str(Path(__file__).parent.parent))
@@ -463,10 +464,13 @@ def customers():
 
         while True:
             # Make API request with pagination token if available
-            params = {"page_token": next_page} if next_page else {}
+            params = {}
+            if next_page:
+                params["page_token"] = next_page
+                logging.info(f"Fetching next page with token: {next_page}")
+            
             response = requests.get(base_url, headers=headers, params=params)
             logging.info(f"Customers response status: {response.status_code}")
-            logging.info(f"Customers response: {response.text}")
             
             if response.status_code == 200:
                 try:
@@ -474,11 +478,16 @@ def customers():
                     if isinstance(data, dict):
                         # Handle customer list response
                         if 'data' in data and isinstance(data['data'], list):
+                            current_page_customers = len(data['data'])
                             all_customers.extend(data['data'])
+                            logging.info(f"Fetched {current_page_customers} customers (total: {len(all_customers)})")
                         
                         # Get next page token
                         next_page = data.get('next_page_token')
-                        if not next_page:
+                        if next_page:
+                            logging.info(f"Found next page token")
+                        else:
+                            logging.info("No more pages to fetch")
                             break
                     else:
                         logging.error("Unexpected response format")
@@ -491,6 +500,9 @@ def customers():
                 logging.error(error_msg)
                 flash(error_msg, "danger")
                 break
+
+            # Add a small delay between requests to avoid rate limiting
+            time.sleep(0.5)
         
         # Update local database with all customers
         if all_customers:
@@ -978,6 +990,134 @@ def save_preferences():
     
     flash('Preferences saved successfully!', 'success')
     return redirect(url_for('preferences'))
+
+@app.route('/admin')
+def admin():
+    # Get customer count from database
+    customer_count = Customer.query.count()
+    return render_template('admin.html', customer_count=customer_count)
+
+@app.route('/admin/refresh-database', methods=['POST'])
+def refresh_database():
+    try:
+        # Fetch all customers from Metronome
+        all_customers = []
+        next_page = None
+        base_url = "https://api.metronome.com/v1/customers"
+        headers = {
+            "Authorization": f"Bearer {metronome_api_key}",
+            "Accept": "application/json"
+        }
+
+        while True:
+            # Make API request with pagination token if available
+            params = {}
+            if next_page:
+                params["page_token"] = next_page  # Using correct parameter name from API docs
+                logging.info(f"Fetching next page with token: {next_page}")
+            
+            response = requests.get(base_url, headers=headers, params=params)
+            logging.info(f"Request URL: {response.url}")  # Log the full URL to verify parameters
+            logging.info(f"Customers response status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, dict):
+                    # Handle customer list response
+                    if 'data' in data and isinstance(data['data'], list):
+                        current_page_customers = len(data['data'])
+                        all_customers.extend(data['data'])
+                        logging.info(f"Fetched {current_page_customers} customers (total: {len(all_customers)})")
+                    
+                    # Get next page token
+                    next_page = data.get('next_page_token')  # Using correct field name from API docs
+                    if next_page:
+                        logging.info(f"Found next page token, continuing to next page")
+                    else:
+                        logging.info("No more pages to fetch")
+                        break
+
+                    # Log the current data structure
+                    logging.info(f"Response data structure: {json.dumps(data, indent=2)}")
+
+                    # Add a small delay between requests to avoid rate limiting
+                    time.sleep(0.5)
+                else:
+                    logging.error("Unexpected response format")
+                    break
+            else:
+                error_msg = f"Failed to fetch customers: {response.text}"
+                logging.error(error_msg)
+                flash(error_msg, "danger")
+                return redirect(url_for('admin'))
+
+        # Update local database with all customers
+        updated_count = 0
+        created_count = 0
+        if all_customers:
+            logging.info(f"Starting database update with {len(all_customers)} customers")
+            
+            # First, get all existing customers for bulk comparison
+            existing_customers = {c.metronome_id: c for c in Customer.query.all()}
+            logging.info(f"Found {len(existing_customers)} existing customers in database")
+            
+            for customer_data in all_customers:
+                customer_id = customer_data.get('id')
+                if not customer_id:
+                    logging.warning(f"Skipping customer with no ID: {customer_data}")
+                    continue
+                
+                # Parse created_at if present
+                created_at = None
+                if 'created_at' in customer_data:
+                    try:
+                        created_at = datetime.fromisoformat(customer_data['created_at'].replace('Z', '+00:00'))
+                    except (ValueError, AttributeError) as e:
+                        logging.warning(f"Error parsing created_at for customer {customer_id}: {e}")
+                
+                customer = existing_customers.get(customer_id)
+                if customer:
+                    # Update existing customer
+                    customer.name = customer_data.get('name', 'Unnamed Customer')
+                    customer.salesforce_id = customer_data.get('salesforce_id')
+                    customer.rate_card_id = customer_data.get('rate_card_id')
+                    customer.created_at = created_at
+                    customer.last_synced = datetime.now(timezone.utc)
+                    updated_count += 1
+                else:
+                    # Create new customer
+                    customer = Customer(
+                        metronome_id=customer_id,
+                        name=customer_data.get('name', 'Unnamed Customer'),
+                        salesforce_id=customer_data.get('salesforce_id'),
+                        rate_card_id=customer_data.get('rate_card_id'),
+                        created_at=created_at,
+                        last_synced=datetime.now(timezone.utc)
+                    )
+                    db.session.add(customer)
+                    created_count += 1
+                
+                # Commit every 100 customers to avoid memory issues
+                if (updated_count + created_count) % 100 == 0:
+                    db.session.commit()
+                    logging.info(f"Committed batch of 100 customers (Updated: {updated_count}, Created: {created_count})")
+            
+            # Final commit for remaining customers
+            db.session.commit()
+            message = f"Successfully refreshed database. Updated {updated_count} and created {created_count} customers (Total: {updated_count + created_count})."
+            logging.info(message)
+            flash(message, "success")
+        else:
+            flash("No customers found to update.", "warning")
+        
+        return redirect(url_for('admin'))
+            
+    except Exception as e:
+        error_msg = f"Error refreshing database: {str(e)}"
+        logging.error(error_msg)
+        logging.exception("Full traceback:")
+        flash(error_msg, "danger")
+        return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8082, debug=True)

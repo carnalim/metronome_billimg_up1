@@ -10,7 +10,7 @@ import logging
 import os
 import numpy as np
 import time
-from website.models import db, LogEntry, Customer
+from website.models import db, LogEntry, Customer, Product
 
 sys.path.append(str(Path(__file__).parent.parent))
 from metronome_billing.core.metronome_api import MetronomeAPI
@@ -30,6 +30,7 @@ def init_db():
         try:
             # Try to query the new columns
             Customer.query.order_by(Customer.last_synced).first()
+            Product.query.order_by(Product.last_synced).first()
         except Exception as e:
             logging.info("Detected schema change, recreating database tables")
             # Drop all tables
@@ -342,73 +343,100 @@ def create_customer():
         response_data['error'] = str(e)
         return render_template('create.html', rate_cards=[], response_data=response_data)
 
-@app.route('/products')
-def products():
+def refresh_products():
+    """Refresh products from Metronome API and store in database"""
     try:
-        # Make API request to get products
         api = MetronomeAPI(api_key=metronome_api_key)
-        logging.info("Fetching products")
+        logging.info("Fetching products from Metronome API")
         response_data = api._make_request("POST", "/contract-pricing/products/list", json={
             "archive_filter": "NOT_ARCHIVED"
         })
-        logging.info(f"Products list response: {json.dumps(response_data, indent=2)}")
 
-        # Get list of products
         if isinstance(response_data, dict) and 'data' in response_data:
             products_list = response_data['data']
-        else:
-            products_list = []
+            updated_count = 0
+            created_count = 0
 
-        # Get detailed information for each product
-        products = []
-        for product in products_list:
-            product_id = product.get('id')
-            if product_id:
-                logging.info(f"Getting details for product {product_id}")
+            for product in products_list:
+                product_id = product.get('id')
+                if not product_id:
+                    continue
+
+                # Get detailed product information
                 product_response = api._make_request("POST", "/contract-pricing/products/get", json={
                     "id": product_id
                 })
-                logging.info(f"Product response: {json.dumps(product_response, indent=2)}")
-                
-                if isinstance(product_response, dict):
+
+                if isinstance(product_response, dict) and 'data' in product_response:
                     product_data = product_response.get('data', {})
-                    logging.info(f"Product data: {json.dumps(product_data, indent=2)}")
-                    # Get name from initial.name field
                     initial = product_data.get('initial', {})
-                    product_data['name'] = initial.get('name', 'Unnamed Product')
-                    product_data['description'] = initial.get('description', '')
-                    logging.info(f"Product name from initial: {product_data['name']}")
                     
-                    # Set archived status
-                    product_data['archived'] = product_data.get('archived_at') is not None
-                    
-                    # Format created_at timestamp if present
-                    created_at = product_data.get('created_at')
-                    if created_at:
+                    # Parse created_at if present
+                    created_at = None
+                    if 'created_at' in product_data:
                         try:
-                            dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                            product_data['created_at'] = dt.strftime('%Y-%m-%d %H:%M:%S')
-                            logging.info(f"Formatted created_at: {product_data['created_at']}")
-                        except (ValueError, AttributeError) as e:
-                            logging.error(f"Error formatting timestamp {created_at}: {e}")
-                    
-                    # Get credit types
-                    credit_types = product_data.get('credit_types', [])
-                    logging.info(f"Credit types: {json.dumps(credit_types, indent=2)}")
-                    
-                    for credit_type in credit_types:
-                        credit_type['name'] = (
-                            credit_type.get('display_name') or 
-                            credit_type.get('name') or 
-                            'Unnamed Credit Type'
+                            created_at = datetime.fromisoformat(product_data['created_at'].replace('Z', '+00:00'))
+                        except (ValueError, AttributeError):
+                            pass
+
+                    # Find or create product
+                    db_product = Product.query.filter_by(product_id=product_id).first()
+                    if db_product:
+                        db_product.name = initial.get('name', 'Unnamed Product')
+                        db_product.description = initial.get('description', '')
+                        db_product.archived = product_data.get('archived_at') is not None
+                        db_product.created_at = created_at
+                        db_product.last_synced = datetime.now(timezone.utc)
+                        db_product.credit_types = product_data.get('credit_types', [])
+                        updated_count += 1
+                    else:
+                        db_product = Product(
+                            product_id=product_id,
+                            name=initial.get('name', 'Unnamed Product'),
+                            description=initial.get('description', ''),
+                            archived=product_data.get('archived_at') is not None,
+                            created_at=created_at,
+                            last_synced=datetime.now(timezone.utc),
+                            credit_types=product_data.get('credit_types', [])
                         )
-                    
-                    products.append(product_data)
-                    logging.info(f"Added product to list: {json.dumps(product_data, indent=2)}")
-                    logging.info(f"Got details for product {product_id}")
+                        db.session.add(db_product)
+                        created_count += 1
+
+            db.session.commit()
+            message = f"Successfully refreshed products. Updated {updated_count} and created {created_count} products."
+            logging.info(message)
+            return True, message
+        else:
+            error_msg = "Unexpected response format from Metronome API"
+            logging.error(error_msg)
+            return False, error_msg
+
+    except Exception as e:
+        error_msg = f"Error refreshing products: {str(e)}"
+        logging.error(error_msg)
+        logging.exception("Full traceback:")
+        return False, error_msg
+
+@app.route('/products')
+def products():
+    try:
+        # Get products from database
+        products = Product.query.all()
         
-        logging.info(f"Found {len(products)} products with details")
-        return render_template('products.html', products=products)
+        # Convert database objects to dictionaries for template
+        products_list = []
+        for product in products:
+            product_dict = {
+                'id': product.product_id,
+                'name': product.name,
+                'description': product.description,
+                'archived': product.archived,
+                'created_at': product.created_at.strftime('%Y-%m-%d %H:%M:%S') if product.created_at else None,
+                'credit_types': product.credit_types
+            }
+            products_list.append(product_dict)
+        
+        return render_template('products.html', products=products_list)
             
     except Exception as e:
         error_msg = f"Error loading products: {str(e)}"
@@ -993,14 +1021,32 @@ def save_preferences():
 
 @app.route('/admin')
 def admin():
-    # Get customer count from database
+    # Get counts from database
     customer_count = Customer.query.count()
-    return render_template('admin.html', customer_count=customer_count)
+    product_count = Product.query.count()
+    return render_template('admin.html',
+                         customer_count=customer_count,
+                         product_count=product_count)
+
+@app.route('/admin/refresh-products', methods=['POST'])
+def refresh_products_route():
+    success, message = refresh_products()
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "danger")
+    return redirect(url_for('admin'))
 
 @app.route('/admin/refresh-database', methods=['POST'])
 def refresh_database():
     try:
-        # Fetch all customers from Metronome
+        # First refresh products
+        success, message = refresh_products()
+        if not success:
+            flash(message, "danger")
+            return redirect(url_for('admin'))
+        
+        # Then fetch all customers from Metronome
         all_customers = []
         next_page = None
         base_url = "https://api.metronome.com/v1/customers"

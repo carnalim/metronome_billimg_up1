@@ -6,13 +6,37 @@
     <div class="card mt-4">
         <div class="card-body">
             <h5 class="card-title">Database Management</h5>
-            <p class="card-text">Use this section to manage the database and refresh customer data.</p>
-            <div class="mb-3">
-                <strong>Current Customer Count:</strong> {{ customer_count }}
+            <p class="card-text">Use this section to manage the database and refresh data.</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Customers</h6>
+                            <div class="mb-3">
+                                <strong>Current Count:</strong> {{ customer_count }}
+                            </div>
+                            <form action="{{ url_for('refresh_database') }}" method="post">
+                                <button type="submit" class="btn btn-primary">Refresh Customers</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Products</h6>
+                            <div class="mb-3">
+                                <strong>Current Count:</strong> {{ product_count }}
+                            </div>
+                            <form action="{{ url_for('refresh_products_route') }}" method="post">
+                                <button type="submit" class="btn btn-primary">Refresh Products</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <form action="{{ url_for('refresh_database') }}" method="post">
-                <button type="submit" class="btn btn-primary">Refresh Customer Database</button>
-            </form>
         </div>
     </div>
 

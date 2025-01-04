@@ -17,6 +17,20 @@ class Product(db.Model):
     last_synced = db.Column(db.DateTime)
     credit_types = db.Column(db.JSON)  # Store credit types as JSON
 
+class Contract(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    customer_id = db.Column(db.String(36), db.ForeignKey('customer.metronome_id'))
+    name = db.Column(db.String(255))
+    product_name = db.Column(db.String(255))
+    rate_card_name = db.Column(db.String(255))
+    status = db.Column(db.String(50))
+    starting_at = db.Column(db.DateTime)
+    ending_before = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime)
+    last_synced = db.Column(db.DateTime)
+
+    customer = db.relationship('Customer', backref=db.backref('contracts', lazy=True))
+
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     metronome_id = db.Column(db.String(255), unique=True)

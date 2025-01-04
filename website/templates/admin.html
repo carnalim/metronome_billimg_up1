@@ -9,7 +9,7 @@
             <p class="card-text">Use this section to manage the database and refresh data.</p>
             
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="card mb-3">
                         <div class="card-body">
                             <h6 class="card-subtitle mb-2 text-muted">Customers</h6>
@@ -23,7 +23,7 @@
                     </div>
                 </div>
                 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="card mb-3">
                         <div class="card-body">
                             <h6 class="card-subtitle mb-2 text-muted">Products</h6>
@@ -32,6 +32,20 @@
                             </div>
                             <form action="{{ url_for('refresh_products_route') }}" method="post">
                                 <button type="submit" class="btn btn-primary">Refresh Products</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Contracts</h6>
+                            <div class="mb-3">
+                                <strong>Current Count:</strong> {{ contract_count }}
+                            </div>
+                            <form action="{{ url_for('refresh_contracts_route') }}" method="post">
+                                <button type="submit" class="btn btn-primary">Refresh Contracts</button>
                             </form>
                         </div>
                     </div>

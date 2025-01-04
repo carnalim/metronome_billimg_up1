@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Contracts</h1>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Contract ID</th>
+                <th>Customer Name</th>
+                <th>Contract Name</th>
+                <th>Product</th>
+                <th>Rate Card</th>
+                <th>Status</th>
+                <th>Starting At</th>
+                <th>Ending Before</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contract in contracts %}
+            <tr>
+                <td>{{ contract.id }}</td>
+                <td>{{ contract.customer_name }}</td>
+                <td>{{ contract.name }}</td>
+                <td>{{ contract.product_name }}</td>
+                <td>{{ contract.rate_card_name }}</td>
+                <td>
+                    <span class="badge {% if contract.status == 'active' %}bg-success{% else %}bg-secondary{% endif %}">
+                        {{ contract.status }}
+                    </span>
+                </td>
+                <td>{{ contract.starting_at }}</td>
+                <td>{{ contract.ending_before if contract.ending_before else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

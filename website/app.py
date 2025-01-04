@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from pathlib import Path
 import sys
@@ -10,7 +11,7 @@ import logging
 import os
 import numpy as np
 import time
-from website.models import db, LogEntry, Customer, Product
+from website.models import db, LogEntry, Customer, Product, Contract
 
 sys.path.append(str(Path(__file__).parent.parent))
 from metronome_billing.core.metronome_api import MetronomeAPI
@@ -31,6 +32,7 @@ def init_db():
             # Try to query the new columns
             Customer.query.order_by(Customer.last_synced).first()
             Product.query.order_by(Product.last_synced).first()
+            Contract.query.order_by(Contract.last_synced).first()
         except Exception as e:
             logging.info("Detected schema change, recreating database tables")
             # Drop all tables
@@ -140,7 +142,6 @@ def create_customer():
             }
             
             # Create customer in Stripe first
-            # stripe.api_key is already set globally
             try:
                 stripe_customer = stripe.Customer.create(
                     name=name,
@@ -829,6 +830,160 @@ def add_credits(customer_id):
         flash(error_msg, "danger")
         return redirect(url_for('customers'))
 
+def refresh_contracts():
+    """Refresh contracts from Metronome API and store in database"""
+    try:
+        api = MetronomeAPI(api_key=metronome_api_key)
+        logging.info("Starting to refresh contracts")
+        
+        # Get rate cards for looking up names
+        try:
+            rate_cards_response = api._make_request("POST", "/contract-pricing/rate-cards/list", json={})
+            rate_cards = {}
+            if isinstance(rate_cards_response, dict) and 'data' in rate_cards_response:
+                for card in rate_cards_response['data']:
+                    initial = card.get('initial', {})
+                    rate_cards[card['id']] = initial.get('name') if initial else card.get('name', 'Unknown Rate Card')
+            logging.info(f"Successfully fetched {len(rate_cards)} rate cards")
+        except Exception as e:
+            logging.error(f"Error fetching rate cards: {str(e)}")
+            rate_cards = {}
+        
+        # Get products for looking up names
+        try:
+            products_response = api._make_request("POST", "/contract-pricing/products/list", json={})
+            products = {}
+            if isinstance(products_response, dict) and 'data' in products_response:
+                for product in products_response['data']:
+                    initial = product.get('initial', {})
+                    products[product['id']] = initial.get('name') if initial else product.get('name', 'Unknown Product')
+            logging.info(f"Successfully fetched {len(products)} products")
+        except Exception as e:
+            logging.error(f"Error fetching products: {str(e)}")
+            products = {}
+
+        # Get all customers from database
+        customers = Customer.query.all()
+        updated_count = 0
+        created_count = 0
+        
+        for customer in customers:
+            if not customer.metronome_id:
+                continue
+                
+            try:
+                logging.info(f"Fetching contracts for customer {customer.metronome_id}")
+                contracts_response = api._make_request("POST", "/contracts/list", json={
+                    "customer_id": customer.metronome_id
+                })
+                
+                if isinstance(contracts_response, dict) and 'data' in contracts_response:
+                    contracts_data = contracts_response['data']
+                    if not isinstance(contracts_data, list):
+                        contracts_data = [contracts_data]
+                    
+                    for contract_data in contracts_data:
+                        try:
+                            contract_id = contract_data.get('id')
+                            if not contract_id:
+                                continue
+
+                            # Get initial contract data
+                            initial = contract_data.get('initial', {})
+                            
+                            # Parse dates
+                            starting_at = None
+                            ending_before = None
+                            try:
+                                if initial.get('starting_at'):
+                                    starting_at = datetime.fromisoformat(initial['starting_at'].replace('Z', '+00:00'))
+                                if initial.get('ending_before'):
+                                    ending_before = datetime.fromisoformat(initial['ending_before'].replace('Z', '+00:00'))
+                            except ValueError as e:
+                                logging.error(f"Error parsing dates for contract {contract_id}: {str(e)}")
+
+                            # Find or create contract
+                            contract = Contract.query.filter_by(id=contract_id).first()
+                            if contract:
+                                contract.name = initial.get('name') if initial else contract_data.get('name', 'Unnamed Contract')
+                                contract.product_name = products.get(initial.get('product_id'), 'Unknown Product')
+                                contract.rate_card_name = rate_cards.get(initial.get('rate_card_id'), 'Unknown Rate Card')
+                                contract.status = contract_data.get('status', 'active')
+                                contract.starting_at = starting_at
+                                contract.ending_before = ending_before
+                                contract.last_synced = datetime.now(timezone.utc)
+                                updated_count += 1
+                            else:
+                                contract = Contract(
+                                    id=contract_id,
+                                    customer_id=customer.metronome_id,
+                                    name=initial.get('name') if initial else contract_data.get('name', 'Unnamed Contract'),
+                                    product_name=products.get(initial.get('product_id'), 'Unknown Product'),
+                                    rate_card_name=rate_cards.get(initial.get('rate_card_id'), 'Unknown Rate Card'),
+                                    status=contract_data.get('status', 'active'),
+                                    starting_at=starting_at,
+                                    ending_before=ending_before,
+                                    created_at=datetime.now(timezone.utc),
+                                    last_synced=datetime.now(timezone.utc)
+                                )
+                                db.session.add(contract)
+                                created_count += 1
+
+                            # Commit every 100 contracts to avoid memory issues
+                            if (updated_count + created_count) % 100 == 0:
+                                db.session.commit()
+                                logging.info(f"Committed batch of 100 contracts (Updated: {updated_count}, Created: {created_count})")
+
+                        except Exception as e:
+                            logging.error(f"Error processing contract {contract_data.get('id')}: {str(e)}")
+                            continue
+                else:
+                    logging.warning(f"No contracts data found for customer {customer.metronome_id}")
+            except Exception as e:
+                logging.error(f"Error fetching contracts for customer {customer.metronome_id}: {str(e)}")
+                continue
+
+        # Final commit for remaining contracts
+        db.session.commit()
+        message = f"Successfully refreshed contracts. Updated {updated_count} and created {created_count} contracts."
+        logging.info(message)
+        return True, message
+
+    except Exception as e:
+        error_msg = f"Error refreshing contracts: {str(e)}"
+        logging.error(error_msg)
+        logging.exception("Full traceback:")
+        return False, error_msg
+
+@app.route('/contracts')
+def contracts():
+    try:
+        # Get contracts from database
+        contracts = Contract.query.all()
+        
+        # Convert database objects to dictionaries for template
+        contracts_list = []
+        for contract in contracts:
+            contracts_list.append({
+                'id': contract.id,
+                'customer_name': contract.customer.name if contract.customer else 'Unknown Customer',
+                'name': contract.name,
+                'product_name': contract.product_name,
+                'rate_card_name': contract.rate_card_name,
+                'status': contract.status,
+                'starting_at': contract.starting_at.strftime('%Y-%m-%d %H:%M:%S') if contract.starting_at else None,
+                'ending_before': contract.ending_before.strftime('%Y-%m-%d %H:%M:%S') if contract.ending_before else None
+            })
+        
+        return render_template('contracts.html', contracts=contracts_list)
+        
+    except Exception as e:
+        error_msg = f"Error loading contracts: {str(e)}"
+        logging.error(error_msg)
+        logging.exception("Full traceback:")
+        flash(error_msg, 'danger')
+        return render_template('contracts.html', contracts=[])
+
 @app.route('/usage', methods=['GET', 'POST'])
 def usage():
     return render_template('usage.html')
@@ -1024,9 +1179,20 @@ def admin():
     # Get counts from database
     customer_count = Customer.query.count()
     product_count = Product.query.count()
+    contract_count = Contract.query.count()
     return render_template('admin.html',
                          customer_count=customer_count,
-                         product_count=product_count)
+                         product_count=product_count,
+                         contract_count=contract_count)
+
+@app.route('/admin/refresh-contracts', methods=['POST'])
+def refresh_contracts_route():
+    success, message = refresh_contracts()
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "danger")
+    return redirect(url_for('admin'))
 
 @app.route('/admin/refresh-products', methods=['POST'])
 def refresh_products_route():
@@ -1157,11 +1323,18 @@ def refresh_database():
             
             # Final commit for remaining customers
             db.session.commit()
-            message = f"Successfully refreshed database. Updated {updated_count} and created {created_count} customers (Total: {updated_count + created_count})."
-            logging.info(message)
-            flash(message, "success")
+            customer_message = f"Successfully refreshed customers. Updated {updated_count} and created {created_count} customers."
+            logging.info(customer_message)
+            flash(customer_message, "success")
         else:
             flash("No customers found to update.", "warning")
+        
+        # Finally refresh contracts
+        success, contract_message = refresh_contracts()
+        if success:
+            flash(contract_message, "success")
+        else:
+            flash(contract_message, "danger")
         
         return redirect(url_for('admin'))
             
